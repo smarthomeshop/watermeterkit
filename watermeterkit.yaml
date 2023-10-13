@@ -7,13 +7,13 @@ substitutions:
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
-  esp8266_restore_from_flash: true
   project:
     name: "smarthomeshop.watermeterkit"
     version: ${watermeterkit_software_version}
 
 esp8266:
   board: esp01_1m
+  restore_from_flash: true
 
 # Enable logging
 logger:
@@ -135,7 +135,6 @@ sensor:
       return timestamp;
   #Pulse meter part
   - platform: pulse_meter
-    internal_filter: 1s
     id: sensor_pulse_meter
     name: "${friendly_name} Current Usage"
     icon: "mdi:water-pump"

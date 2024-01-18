@@ -8,7 +8,7 @@ Check our website to view if your watermeter is compatible: https://watermeterki
 
 ## Features
 
-- **Real-time Monitoring:** Get real-time data on your water consumption, including water flow rate and temperature.
+- **Real-time Monitoring:** Get real-time data on your water consumption, including water flow rate and enviroment temperature.
 
 - **Data Visualization:** Visualize your water usage trends per hour, day, month, or year in liters, right within Home Assistant.
 

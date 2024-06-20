@@ -22,7 +22,8 @@ logger:
 api:
 
 ota:
-
+  - platform: esphome
+  
 dashboard_import:
   package_import_url: github://smarthomeshop/watermeterkit/watermeterkit.yaml@main
 

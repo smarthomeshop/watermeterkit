@@ -2,7 +2,8 @@
 substitutions:
   device_name: watermeterkit
   friendly_name: WaterMeterKit
-  watermeterkit_software_version: "2023.10"
+  watermeterkit_software_version: "V1.1"
+  watermeterkit_hardware_version: "V2"
 
 esphome:
   name: ${device_name}
@@ -21,7 +22,9 @@ logger:
 # Enable Home Assistant API
 api:
 
+#Enable Over the Air updates
 ota:
+  - platform: esphome
 
 dashboard_import:
   package_import_url: github://smarthomeshop/watermeterkit/watermeterkit.yaml@main
@@ -178,18 +181,24 @@ text_sensor:
   # IP address #
   - platform: wifi_info
     ip_address:
-      name: "${friendly_name} IP address"
+      name: "IP address"
       icon: "mdi:network-outline"
     ssid:
-      name: "${friendly_name} Connected SSID"
+      name: "Connected SSID"
     bssid:
-      name: "${friendly_name} Connected BSSID"
+      name: "Connected BSSID"
   - platform: version
     id: text_sensor_version
-    name: "${friendly_name} ESPHome Version"
+    name: "ESPHome Version"
   - platform: template
     id: text_sensor_watermeterkit_version
-    name: "${friendly_name} Software version"
+    name: "Software version"
     update_interval: 5h
     lambda: |-
       return {"${watermeterkit_software_version}"};
+  - platform: template
+    id: text_sensor_watermeterkit_hardware_version
+    name: "Hardware version"
+    update_interval: 5h
+    lambda: |-
+      return {"${watermeterkit_hardware_version}"};

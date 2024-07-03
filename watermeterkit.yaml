@@ -24,6 +24,7 @@ api:
 
 #Enable Over the Air updates
 ota:
+  - platform: esphome
 
 dashboard_import:
   package_import_url: github://smarthomeshop/watermeterkit/watermeterkit.yaml@main
@@ -195,3 +196,9 @@ text_sensor:
     update_interval: 5h
     lambda: |-
       return {"${watermeterkit_software_version}"};
+  - platform: template
+    id: text_sensor_watermeterkit_hardware_version
+    name: "Hardware version"
+    update_interval: 5h
+    lambda: |-
+      return {"${watermeterkit_hardware_version}"};

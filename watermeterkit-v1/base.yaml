@@ -1,6 +1,4 @@
 # WaterMeterKit V1 - Base Configuration
-# Core functionality shared between all firmware variants
-# V1 is ESP8266 based (WiFi only, no Ethernet)
 
 substitutions:
   # Product identification

@@ -1,6 +1,6 @@
 # WaterMeterKit for Home Assistant / ESPHome
 
-![WaterMeterKit](images/watermeterkit-logo.png)
+![WaterMeterKit](images/watermeterkit-product-shop.png)
 
 WaterMeterKit is a compact water meter sensor designed to monitor your water consumption in real-time. It integrates seamlessly with Home Assistant via ESPHome and runs fully local (no cloud required).
 
@@ -64,3 +64,6 @@ PRs and issues are welcome. Please keep changes modular and follow ESPHome best 
 ## License
 
 This project is released under the CC BY‑NC 4.0 license
+
+
+![WaterMeterKit](images/watermeterkit-inthebox-shop.png)

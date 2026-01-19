@@ -4,15 +4,19 @@
 
 WaterMeterKit is a compact water meter sensor designed to monitor your water consumption in real-time. It integrates seamlessly with Home Assistant via ESPHome and runs fully local (no cloud required).
 
-Learn more on our website: https://watermeterkit.nl/en
+## How it works
+
+The WaterMeterKit uses a magnetic sensor to detect the rotating element on your analog water meter, counting each liter that passes through. Compatible with most major water meter brands including Actaris, Elster, Honeywell, Itron, Sensus and more.
+
+👉 **Check compatibility for your water meter**: https://watermeterkit.nl/en
 
 ## Key features
 
 - **Water flow monitoring**: Real-time water usage tracking with pulse meter sensor.
-- **Environment sensing**: Temperature and humidity measurement (HDC1080).
+- **Environment sensing**: Temperature and humidity measurement.
 - **Connectivity**: Wi-Fi with captive portal fallback.
 - **Provisioning**: Improv Serial and captive portal for easy setup.
-- **Local only**: Works without cloud services; OTA supported via manifest on GitHub Pages.
+- **Local only**: Works also without cloud services (100% local); OTA supported via manifest on GitHub Pages.
 
 ## Variants
 

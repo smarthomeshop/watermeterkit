@@ -1,0 +1,12 @@
+# WaterMeterKit V1 Configuration
+# Main entry point for V1 firmware (WiFi only)
+
+substitutions:
+  default_network: "WiFi"
+
+packages:
+  base: !include base.yaml
+  wifi: !include wifi.yaml
+
+dashboard_import:
+  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit.yaml@main

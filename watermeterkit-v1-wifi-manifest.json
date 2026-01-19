@@ -1,0 +1,21 @@
+{
+  "name": "WaterMeterKit V1 WiFi",
+  "version": "1.1",
+  "home_assistant_domain": "esphome",
+  "new_install_skip_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "ota": {
+        "path": "watermeterkit-v1-wifi/watermeterkit-esp8266.ota.bin",
+        "md5": "331d49280dccabda5eb907035ec3c7c2"
+      },
+      "parts": [
+        {
+          "path": "watermeterkit-v1-wifi/watermeterkit-esp8266.factory.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

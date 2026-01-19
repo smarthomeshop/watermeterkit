@@ -1,0 +1,187 @@
+# WaterMeterKit V1 - Base Configuration
+
+substitutions:
+  # Product identification
+  device_name: watermeterkit
+  friendly_name: WaterMeterKit
+  software_version: "1.4"
+  hardware_version: "V1"
+  
+  # OTA manifest URL
+  manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-manifest.json"
+  
+  # Default values (can be overridden)
+  default_network: "WiFi"
+  cloud_enabled: "false"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: "smarthomeshop.watermeterkit"
+    version: ${software_version}
+  on_boot:
+    - priority: 610
+      then:
+        - lambda: |-
+            ESP_LOGI("main", "Checking for firmware updates...");
+        - component.update: firmware_update
+
+esp8266:
+  board: esp01_1m
+  restore_from_flash: true
+
+# === Core Components ===
+logger:
+  baud_rate: 115200
+
+api:
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+  - platform: http_request
+    id: ota_http
+
+http_request:
+  useragent: watermeterkit-esphome
+  verify_ssl: false
+  timeout: 10s
+
+web_server:
+  port: 80
+
+# === Firmware Update Component ===
+update:
+  - platform: http_request
+    name: "${friendly_name} Firmware"
+    id: firmware_update
+    source: ${manifest_url}
+
+
+# === Device Controls ===
+switch:
+  - platform: restart
+    id: switch_restart
+    name: "${friendly_name} Restart"
+
+button:
+  - platform: factory_reset
+    name: "${friendly_name} Factory Reset"
+    entity_category: config
+    disabled_by_default: true
+
+# === Status LED ===
+status_led:
+  pin: GPIO12
+
+# === LED Outputs ===
+output:
+  - platform: esp8266_pwm
+    id: output_led_green
+    pin: GPIO14
+  - platform: esp8266_pwm
+    id: output_led_blue
+    pin: GPIO16
+
+light:
+  - platform: monochromatic
+    id: light_led_green
+    output: output_led_green
+  - platform: monochromatic
+    id: light_led_blue
+    output: output_led_blue
+
+# === I2C Bus ===
+i2c:
+  sda: GPIO04
+  scl: GPIO05
+
+# === Time ===
+time:
+  - platform: homeassistant
+    id: time_homeassistant
+    on_time_sync:
+      - component.update: sensor_uptime_timestamp
+  
+  - platform: sntp
+    id: time_sntp
+
+# === Sensors ===
+sensor:
+  # Uptime (internal)
+  - platform: uptime
+    id: sensor_uptime
+
+  # Uptime Timestamp (sends once)
+  - platform: template
+    id: sensor_uptime_timestamp
+    name: "${friendly_name} Uptime"
+    device_class: "timestamp"
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      static float timestamp = (
+        id(time_homeassistant).utcnow().timestamp - id(sensor_uptime).state
+      );
+      return timestamp;
+
+  # === Pulse Meter (Water Flow Sensor) ===
+  - platform: pulse_meter
+    id: sensor_pulse_meter
+    name: "${friendly_name} Current Usage"
+    icon: "mdi:water-pump"
+    unit_of_measurement: "L/min"
+    internal_filter_mode: PULSE
+    timeout: 2min
+    internal_filter: 200ms
+    accuracy_decimals: 1
+    pin: GPIO13
+    total:
+      id: sensor_pulse_meter_total
+      name: "${friendly_name} Total Consumption"
+      icon: "mdi:cube-outline"
+      unit_of_measurement: "m³"
+      state_class: total_increasing
+      device_class: water
+      accuracy_decimals: 3
+      filters:
+        - multiply: 0.001
+    on_value:
+      then:
+        - light.turn_on:
+            id: light_led_green
+            flash_length: 1s
+
+  # === HDC1080 Temperature & Humidity Sensor ===
+  - platform: hdc1080
+    temperature:
+      id: sensor_temperature
+      name: "${friendly_name} Temperature"
+      filters:
+        offset: -5.5
+    humidity:
+      id: sensor_humidity
+      name: "${friendly_name} Humidity"
+      filters:
+        offset: 12
+    update_interval: 60s
+
+# === Text Sensors ===
+text_sensor:
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"
+    
+  - platform: template
+    id: text_sensor_watermeterkit_version
+    name: "${friendly_name} Software Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${software_version}"};
+      
+  - platform: template
+    name: "${friendly_name} Hardware Version"
+    lambda: 'return {"${hardware_version}"};'
+    update_interval: 5h

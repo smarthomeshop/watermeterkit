@@ -9,9 +9,8 @@ substitutions:
   software_version: "1.1"
   hardware_version: "V1"
   
-  # OTA manifest URLs
-  wifi_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-wifi-manifest.json"
-  wifi_cloud_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-wifi-cloud-manifest.json"
+  # OTA manifest URL
+  manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-manifest.json"
   
   # Default values (can be overridden)
   default_network: "WiFi"
@@ -28,9 +27,7 @@ esphome:
     - priority: 610
       then:
         - lambda: |-
-            // TODO: Add WiFi Cloud option when cloud version is released
-            ESP_LOGI("main", "OTA updates set to use WiFi firmware");
-            id(firmware_update).set_source_url("${wifi_manifest_url}");
+            ESP_LOGI("main", "Checking for firmware updates...");
         - component.update: firmware_update
 
 esp8266:
@@ -60,27 +57,8 @@ update:
   - platform: http_request
     name: "${friendly_name} Firmware"
     id: firmware_update
-    source: ${wifi_manifest_url}
+    source: ${manifest_url}
 
-# === Firmware Selector ===
-# TODO: Add "WiFi Cloud" option when cloud version is released
-select:
-  - platform: template
-    id: firmware_selector
-    name: "${friendly_name} Firmware Type"
-    icon: "mdi:network"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    options:
-      - "WiFi"
-    initial_option: ${default_network}
-    on_value:
-      then:
-        - lambda: |-
-            ESP_LOGI("main", "OTA updates set to use WiFi firmware");
-            id(firmware_update).set_source_url("${wifi_manifest_url}");
-        - component.update: firmware_update
 
 # === Device Controls ===
 switch:

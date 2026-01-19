@@ -18,13 +18,11 @@ The WaterMeterKit uses a magnetic sensor to detect the rotating element on your 
 - **Provisioning**: Improv Serial and captive portal for easy setup.
 - **Local only**: Works also without cloud services (100% local); OTA supported via manifest on GitHub Pages.
 
-## Variants
+## Hardware versions
 
-We publish firmware variants for different use cases. Each variant is a dedicated YAML in `watermeterkit-v1/` and ships with a matching Web Tools manifest on the `gh-pages` branch.
-
-| Variant | Description |
-|---------|-------------|
-| WiFi | Standard WiFi connectivity |
+| Version | Chip | Connectivity |
+|---------|------|--------------|
+| V1 | ESP8266 | WiFi |
 
 ## Getting started
 
@@ -40,8 +38,8 @@ Please check for full documentation our quick start guide: https://smarthomeshop
 
 ## Repository layout
 
-- `watermeterkit-v1/` — ESPHome configurations (base, wifi, and entry points)
-- `.github/workflows/` — CI to build and publish artifacts/manifests to `gh-pages`
+- `watermeterkit-v1/` — ESPHome configurations for hardware V1
+- `.github/workflows/` — CI to build and publish firmware to `gh-pages`
 - `gh-pages` branch — public firmware and manifests (for OTA and ESP Web Tools)
 
 ## Sensors

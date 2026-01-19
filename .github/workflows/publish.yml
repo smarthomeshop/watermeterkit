@@ -175,37 +175,19 @@ jobs:
           fi
 
   # ============================================
-  # WaterMeterKit V1 Variants (WiFi only)
-  # Note: ESP8266 does not support Ethernet
-  # Note: Cloud version is not released yet
+  # WaterMeterKit V1 (ESP8266, WiFi only)
   # ============================================
-  publish-v1-wifi:
-    name: Publish WaterMeterKit V1 WiFi
+  publish-v1:
+    name: Publish WaterMeterKit V1
     needs: [detect-changes]
     if: needs.detect-changes.outputs.v1_changed == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: watermeterkit-v1/watermeterkit-wifi.yaml
-      name: WaterMeterKit V1 WiFi
-      manifest_filename: watermeterkit-v1-wifi-manifest.json
+      files: watermeterkit-v1/watermeterkit.yaml
+      name: WaterMeterKit V1
+      manifest_filename: watermeterkit-v1-manifest.json
       clean: false
       esphome_version: latest
-      directory_name: watermeterkit-v1-wifi
+      directory_name: watermeterkit-v1
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
       base_path: watermeterkit-v1
-
-  # TODO: Enable when cloud version is ready
-  # publish-v1-wifi-cloud:
-  #   name: Publish WaterMeterKit V1 WiFi Cloud
-  #   needs: [detect-changes]
-  #   if: needs.detect-changes.outputs.v1_changed == 'true'
-  #   uses: ./.github/workflows/esphome-build.yml
-  #   with:
-  #     files: watermeterkit-v1/watermeterkit-wifi-cloud.yaml
-  #     name: WaterMeterKit V1 WiFi Cloud
-  #     manifest_filename: watermeterkit-v1-wifi-cloud-manifest.json
-  #     clean: false
-  #     esphome_version: latest
-  #     directory_name: watermeterkit-v1-wifi-cloud
-  #     software_version: ${{ needs.detect-changes.outputs.v1_version }}
-  #     base_path: watermeterkit-v1

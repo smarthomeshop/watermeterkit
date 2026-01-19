@@ -7,7 +7,3 @@ secrets.yaml
 
 # macOS
 .DS_Store
-
-# Cloud version (not ready for release yet)
-watermeterkit-v1/cloud.yaml
-watermeterkit-v1/watermeterkit-wifi-cloud.yaml

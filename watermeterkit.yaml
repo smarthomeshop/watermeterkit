@@ -1,5 +1,5 @@
-# WaterMeterKit V1 WiFi Configuration (Legacy URL for backwards compatibility)
-# New users should use: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit-wifi.yaml@main
+# WaterMeterKit V1 Configuration (Legacy URL for backwards compatibility)
+# New users should use: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit.yaml@main
 #
 # This file redirects existing users to the new v1 structure via OTA update.
 # After OTA, users will automatically use the new modular YAML structure.
@@ -9,4 +9,4 @@ packages:
   wifi: !include watermeterkit-v1/wifi.yaml
 
 dashboard_import:
-  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit-wifi.yaml@main
+  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit.yaml@main

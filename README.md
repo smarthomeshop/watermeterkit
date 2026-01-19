@@ -26,7 +26,7 @@ We publish firmware variants for different use cases. Each variant is a dedicate
 
 1. **Hardware**: Install the WaterMeterKit on your water meter.
 2. **Flash firmware**:
-   - Use ESP Web Tools from our docs or GitHub Pages (per-variant manifest).
+   - Use our web-based flash tool at https://smarthomeshop.io/en/firmware to flash or re-flash your kit.
    - Or compile/flash locally with ESPHome CLI.
 3. **Onboarding**:
    - Connect to the `watermeterkit` hotspot if WiFi is not configured.

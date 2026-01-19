@@ -46,8 +46,8 @@ Please check for full documentation our quick start guide: https://smarthomeshop
 |--------|-------------|
 | Current Usage | Water flow rate in L/min |
 | Total Consumption | Cumulative water usage in m³ |
-| Temperature | Environment temperature (HDC1080) |
-| Humidity | Environment humidity (HDC1080) |
+| Temperature | Environment temperature |
+| Humidity | Environment humidity |
 | WiFi Signal | WiFi signal strength |
 | Uptime | Device uptime |
 

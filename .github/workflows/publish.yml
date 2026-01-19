@@ -1,0 +1,211 @@
+name: Build and Publish WaterMeterKit firmware
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      force_all:
+        description: "Force build all versions"
+        required: false
+        type: boolean
+        default: false
+  # Scheduled build: rebuild all firmware monthly with latest ESPHome
+  # ESPHome releases new versions around the 15th of each month
+  # We build on the 20th to give ESPHome ~5 days for bugfix releases
+  schedule:
+    - cron: "0 3 20 * *" # Every 20th of the month at 03:00 UTC
+  push:
+    branches:
+      - main
+    paths:
+      - "watermeterkit-v1/**"
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================
+  # Detect which versions have changed
+  # ============================================
+  detect-changes:
+    name: Detect changed versions
+    runs-on: ubuntu-latest
+    outputs:
+      v1_changed: ${{ steps.changes.outputs.v1 }}
+      v1_version: ${{ steps.versions.outputs.v1_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for changes in each version
+        id: changes
+        shell: bash
+        run: |
+          # For workflow_dispatch with force_all, build everything
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_all }}" == "true" ]]; then
+            echo "Force building all versions"
+            echo "v1=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For scheduled runs, build everything (to get latest ESPHome)
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "Scheduled build - rebuilding all versions with latest ESPHome"
+            echo "v1=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For tags, build everything
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "Tag detected, building all versions"
+            echo "v1=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For PRs and pushes, detect changes
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+            # For push events, compare with previous commit
+            BASE_SHA=${{ github.event.before }}
+            HEAD_SHA=${{ github.sha }}
+          fi
+
+          # Check if base SHA is valid (not all zeros for first push)
+          if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "First push detected, building all versions"
+            echo "v1=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Detect changes in each version folder
+          V1_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -q "^watermeterkit-v1/" && echo "true" || echo "false")
+
+          echo "v1=$V1_CHANGED" >> $GITHUB_OUTPUT
+          echo "V1 changed: $V1_CHANGED"
+
+      - name: Update version numbers for changed versions
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # For scheduled builds, just use current versions (no increment)
+          IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+
+          update_version() {
+            local VERSION_FILE=$1
+            local OUTPUT_NAME=$2
+
+            if [[ ! -f "$VERSION_FILE" ]]; then
+              echo "${OUTPUT_NAME}=1.0" >> $GITHUB_OUTPUT
+              return
+            fi
+
+            CURRENT_VERSION=$(grep "software_version:" "$VERSION_FILE" | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
+            echo "Current version for $VERSION_FILE: $CURRENT_VERSION"
+
+            # For scheduled builds, keep current version (just rebuild with latest ESPHome)
+            if [[ "$IS_SCHEDULED" == "true" ]]; then
+              echo "${OUTPUT_NAME}=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+              echo "Scheduled build - keeping version: $CURRENT_VERSION"
+              return
+            fi
+
+            # For tags, use the tag version
+            if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" =~ ^v[0-9]+(\.[0-9]+)*$ ]]; then
+              NEW_VERSION="${GITHUB_REF_NAME#v}"
+            else
+              # Increment minor version
+              if [[ "$CURRENT_VERSION" =~ ^([0-9]+)\.([0-9]+)(.*)$ ]]; then
+                MAJOR="${BASH_REMATCH[1]}"
+                MINOR="${BASH_REMATCH[2]}"
+                SUFFIX="${BASH_REMATCH[3]}"
+                NEW_MINOR=$((MINOR + 1))
+                NEW_VERSION="${MAJOR}.${NEW_MINOR}${SUFFIX}"
+              else
+                SHORTSHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+                NEW_VERSION="dev-${SHORTSHA}"
+              fi
+            fi
+
+            echo "${OUTPUT_NAME}=${NEW_VERSION}" >> $GITHUB_OUTPUT
+            echo "New version for $VERSION_FILE: $NEW_VERSION"
+          }
+
+          # Get/update versions for each changed version
+          if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+            update_version "watermeterkit-v1/base.yaml" "v1_version"
+          else
+            # Just read current version without incrementing
+            V1_CURRENT=$(grep "software_version:" "watermeterkit-v1/base.yaml" 2>/dev/null | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/' || echo "1.0")
+            echo "v1_version=$V1_CURRENT" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit version updates
+        # Don't update versions on scheduled builds (just rebuild with latest ESPHome)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          CHANGES_MADE=false
+
+          # Update V1 if changed
+          if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+            sed -i "s/^\s*software_version: \".*\"/  software_version: \"${{ steps.versions.outputs.v1_version }}\"/" watermeterkit-v1/base.yaml
+            CHANGES_MADE=true
+          fi
+
+          if [[ "$CHANGES_MADE" == "true" ]] && ! git diff --quiet; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add watermeterkit-v*/base.yaml
+            
+            # Build commit message showing which versions were updated
+            MSG="chore: update versions"
+            [[ "${{ steps.changes.outputs.v1 }}" == "true" ]] && MSG="$MSG V1=${{ steps.versions.outputs.v1_version }}"
+            MSG="$MSG [skip ci]"
+            
+            git commit -m "$MSG" || exit 0
+            git push || echo "Nothing to push"
+          fi
+
+  # ============================================
+  # WaterMeterKit V1 Variants (WiFi only)
+  # Note: ESP8266 does not support Ethernet
+  # Note: Cloud version is not released yet
+  # ============================================
+  publish-v1-wifi:
+    name: Publish WaterMeterKit V1 WiFi
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_changed == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: watermeterkit-v1/watermeterkit-wifi.yaml
+      name: WaterMeterKit V1 WiFi
+      manifest_filename: watermeterkit-v1-wifi-manifest.json
+      clean: false
+      esphome_version: latest
+      directory_name: watermeterkit-v1-wifi
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      base_path: watermeterkit-v1
+
+  # TODO: Enable when cloud version is ready
+  # publish-v1-wifi-cloud:
+  #   name: Publish WaterMeterKit V1 WiFi Cloud
+  #   needs: [detect-changes]
+  #   if: needs.detect-changes.outputs.v1_changed == 'true'
+  #   uses: ./.github/workflows/esphome-build.yml
+  #   with:
+  #     files: watermeterkit-v1/watermeterkit-wifi-cloud.yaml
+  #     name: WaterMeterKit V1 WiFi Cloud
+  #     manifest_filename: watermeterkit-v1-wifi-cloud-manifest.json
+  #     clean: false
+  #     esphome_version: latest
+  #     directory_name: watermeterkit-v1-wifi-cloud
+  #     software_version: ${{ needs.detect-changes.outputs.v1_version }}
+  #     base_path: watermeterkit-v1

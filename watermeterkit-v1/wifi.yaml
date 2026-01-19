@@ -1,0 +1,42 @@
+# WaterMeterKit V1 - WiFi Network Configuration
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${device_name}
+    password: ${device_name}
+
+captive_portal:
+
+# Improv Serial (for WiFi provisioning via USB)
+# Note: ESP8266 does not support BLE Improv
+improv_serial:
+  next_url: "https://app.smarthomeshop.io/setup/welcome?device={{device_name}}&ip={{ip_address}}&cloud=${cloud_enabled}&hw=${hardware_version}"
+
+sensor:
+  # WiFi signal strength
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 300s
+    id: sensor_wifi_signal
+
+text_sensor:
+  # WiFi info
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip_address
+      name: "${friendly_name} IP Address"
+      icon: "mdi:network-outline"
+    ssid:
+      id: wifi_ssid
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+    mac_address:
+      id: wifi_mac_address
+      name: "${friendly_name} MAC Address"
+      entity_category: diagnostic

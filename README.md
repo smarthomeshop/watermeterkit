@@ -8,7 +8,7 @@ Check our website to view if your watermeter is compatible: https://watermeterki
 
 ## Features
 
-- **Real-time Monitoring:** Get real-time data on your water consumption, including water flow rate and enviroment temperature.
+- **Real-time Monitoring:** Get real-time data on your water consumption, including water flow rate and environment temperature.
 
 - **Data Visualization:** Visualize your water usage trends per hour, day, month, or year in liters, right within Home Assistant.
 
@@ -18,15 +18,101 @@ Check our website to view if your watermeter is compatible: https://watermeterki
 
 - **Integration with Home Assistant:** Seamlessly integrate the kit with Home Assistant using the provided blueprints.
 
-## Contents of the Kit
+- **OTA Updates:** Automatic firmware updates via GitHub Pages with easy firmware type switching.
 
-- WaterMeterKit
-- All necessary cables and watermeter sensor
-- Installation guide
+- **Cloud Sync (Optional):** Sync your water usage data to the SmartHomeShop cloud for advanced analytics.
+
+## Hardware Versions
+
+| Version | Chip | Network | Cloud | Status |
+|---------|------|---------|-------|--------|
+| V1 | ESP8266 | WiFi | ✅ | Current |
+
+## Firmware Variants
+
+Each hardware version has multiple firmware variants available:
+
+| Variant | Description |
+|---------|-------------|
+| WiFi | Standard WiFi connectivity |
+| WiFi Cloud | WiFi + Cloud sync to SmartHomeShop |
+
+## Repository Structure
+
+```
+watermeterkit/
+├── .github/
+│   └── workflows/
+│       ├── esphome-build.yml      # Reusable build workflow
+│       └── publish.yml            # Main workflow (triggers builds)
+├── watermeterkit-v1/              # Hardware version 1 (ESP8266)
+│   ├── base.yaml                  # Core functionality
+│   ├── wifi.yaml                  # WiFi network configuration
+│   ├── cloud.yaml                 # Cloud sync (optional)
+│   ├── watermeterkit-wifi.yaml    # Main: base + wifi
+│   └── watermeterkit-wifi-cloud.yaml  # Main: base + wifi + cloud
+├── images/
+│   └── watermeterkit-logo.png
+└── README.md
+```
 
 ## Installation
 
-Detailed installation instructions and Home Assistant integration guides can be found on our website [SmartHomeShop.io](https://smarthomeshop.io/en).
+### Option 1: Web Installer (Recommended)
+
+Visit our web installer at [SmartHomeShop.io](https://smarthomeshop.io) to flash the firmware directly from your browser.
+
+### Option 2: ESPHome Dashboard
+
+Add the following to your ESPHome configuration:
+
+```yaml
+# For WiFi version:
+packages:
+  watermeterkit: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit-wifi.yaml@main
+
+# For WiFi Cloud version:
+packages:
+  watermeterkit: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit-wifi-cloud.yaml@main
+```
+
+### Option 3: Manual Build
+
+1. Clone this repository
+2. Create a `secrets.yaml` file in the version folder with your WiFi credentials:
+   ```yaml
+   wifi_ssid: "YourSSID"
+   wifi_password: "YourPassword"
+   ```
+3. Build with ESPHome: `esphome run watermeterkit-v1/watermeterkit-wifi.yaml`
+
+## OTA Updates
+
+The WaterMeterKit supports Over-The-Air updates via HTTP request. You can switch between firmware variants (WiFi/WiFi Cloud) directly from Home Assistant:
+
+1. Go to your WaterMeterKit device in Home Assistant
+2. Find the "Firmware Type" selector
+3. Choose your preferred variant
+4. The firmware update entity will check for updates from the correct manifest
+
+Firmware binaries are automatically published to GitHub Pages on every release.
+
+## Contents of the Kit
+
+- WaterMeterKit (ESP8266)
+- All necessary cables and watermeter sensor
+- Installation guide
+
+## Sensors
+
+| Sensor | Description |
+|--------|-------------|
+| Current Usage | Water flow rate in L/min |
+| Total Consumption | Cumulative water usage in m³ |
+| Temperature | Environment temperature (HDC1080) |
+| Humidity | Environment humidity (HDC1080) |
+| WiFi Signal | WiFi signal strength |
+| Uptime | Device uptime |
 
 ## Contributing
 

@@ -4,7 +4,7 @@ substitutions:
   # Product identification
   device_name: watermeterkit
   friendly_name: WaterMeterKit
-  software_version: "1.4"
+  software_version: "1.5"
   hardware_version: "V1"
   
   # OTA manifest URL
@@ -175,13 +175,14 @@ text_sensor:
     name: "${friendly_name} ESPHome Version"
     
   - platform: template
-    id: text_sensor_watermeterkit_version
+    id: text_sensor_watermeterkit_software_version
     name: "${friendly_name} Software Version"
     update_interval: 5h
     lambda: |-
       return {"${software_version}"};
       
   - platform: template
+    id: text_sensor_watermeterkit_hardware_version
     name: "${friendly_name} Hardware Version"
     lambda: 'return {"${hardware_version}"};'
     update_interval: 5h

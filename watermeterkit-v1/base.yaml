@@ -5,7 +5,7 @@ substitutions:
   # Product identification
   device_name: watermeterkit
   friendly_name: WaterMeterKit
-  software_version: "1.5"
+  software_version: "1.6"
   hardware_version: "V1"
 
 esphome:

@@ -147,17 +147,19 @@ jobs:
             echo "v1_version=$V1_CURRENT" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit version updates
+      - name: Commit version updates and create tag
         # Don't update versions on scheduled builds (just rebuild with latest ESPHome)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           CHANGES_MADE=false
+          NEW_VERSION=""
 
           # Update V1 if changed
           if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
             sed -i "s/^\s*software_version: \".*\"/  software_version: \"${{ steps.versions.outputs.v1_version }}\"/" watermeterkit-v1/base.yaml
             CHANGES_MADE=true
+            NEW_VERSION="${{ steps.versions.outputs.v1_version }}"
           fi
 
           if [[ "$CHANGES_MADE" == "true" ]] && ! git diff --quiet; then
@@ -172,6 +174,21 @@ jobs:
             
             git commit -m "$MSG" || exit 0
             git push || echo "Nothing to push"
+            
+            # Create and push version tag
+            if [[ -n "$NEW_VERSION" && ! "$NEW_VERSION" =~ ^dev- ]]; then
+              TAG_NAME="v${NEW_VERSION}"
+              
+              # Check if tag already exists
+              if ! git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+                echo "Creating tag: $TAG_NAME"
+                git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+                git push origin "$TAG_NAME"
+                echo "Tag $TAG_NAME created and pushed"
+              else
+                echo "Tag $TAG_NAME already exists, skipping"
+              fi
+            fi
           fi
 
   # ============================================

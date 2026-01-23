@@ -15,7 +15,7 @@ captive_portal:
 # Improv Serial (for WiFi provisioning via USB)
 # Note: ESP8266 does not support BLE Improv
 improv_serial:
-  next_url: "https://app.smarthomeshop.io/setup/welcome?device={{device_name}}&ip={{ip_address}}&cloud=${cloud_enabled}&hw=${hardware_version}"
+  next_url: "https://app.smarthomeshop.io/setup/welcome?device={{device_name}}&ip={{ip_address}}&hw=${hardware_version}"
 
 sensor:
   # WiFi signal strength

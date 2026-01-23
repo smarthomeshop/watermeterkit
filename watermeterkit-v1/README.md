@@ -46,7 +46,12 @@ V1 supports easy WiFi setup via:
 
 ## OTA Updates
 
-Firmware updates are automatically made available via:
-- `https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-manifest.json`
+Firmware updates are done via the ESPHome Dashboard in Home Assistant:
+1. Go to Settings → Add-ons → ESPHome
+2. Your WaterMeterKit will show when an update is available
+3. Click "Update" to flash the new firmware wirelessly
 
-Updates are directly available in Home Assistant when a new version is released.
+**Note:** Due to ESP8266 1MB flash limitations, HTTP-based OTA is not supported. Updates must be done via ESPHome Dashboard or USB.
+
+For initial flashing or recovery, use our web-based flash tool:
+- https://smarthomeshop.io/en/firmware

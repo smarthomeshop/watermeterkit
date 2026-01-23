@@ -1,4 +1,5 @@
 # WaterMeterKit V1 - Base Configuration
+# ESP8266 with 1MB flash - keep firmware small for OTA compatibility
 
 substitutions:
   # Product identification
@@ -6,13 +7,6 @@ substitutions:
   friendly_name: WaterMeterKit
   software_version: "1.5"
   hardware_version: "V1"
-  
-  # OTA manifest URL
-  manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-manifest.json"
-  
-  # Default values (can be overridden)
-  default_network: "WiFi"
-  cloud_enabled: "false"
 
 esphome:
   name: ${device_name}
@@ -21,12 +15,6 @@ esphome:
   project:
     name: "smarthomeshop.watermeterkit"
     version: ${software_version}
-  on_boot:
-    - priority: 610
-      then:
-        - lambda: |-
-            ESP_LOGI("main", "Checking for firmware updates...");
-        - component.update: firmware_update
 
 esp8266:
   board: esp01_1m
@@ -41,24 +29,9 @@ api:
 ota:
   - platform: esphome
     id: ota_esphome
-  - platform: http_request
-    id: ota_http
-
-http_request:
-  useragent: watermeterkit-esphome
-  verify_ssl: false
-  timeout: 10s
 
 web_server:
   port: 80
-
-# === Firmware Update Component ===
-update:
-  - platform: http_request
-    name: "${friendly_name} Firmware"
-    id: firmware_update
-    source: ${manifest_url}
-
 
 # === Device Controls ===
 switch:
@@ -104,9 +77,6 @@ time:
     id: time_homeassistant
     on_time_sync:
       - component.update: sensor_uptime_timestamp
-  
-  - platform: sntp
-    id: time_sntp
 
 # === Sensors ===
 sensor:

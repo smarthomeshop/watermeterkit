@@ -16,7 +16,7 @@ The WaterMeterKit uses a magnetic sensor to detect the rotating element on your 
 - **Environment sensing**: Temperature and humidity measurement.
 - **Connectivity**: Wi-Fi with captive portal fallback.
 - **Provisioning**: Improv Serial and captive portal for easy setup.
-- **Local only**: Works also without cloud services (100% local); OTA supported via manifest on GitHub Pages.
+- **Local only**: Works without cloud services (100% local).
 
 ## Hardware versions
 
@@ -33,6 +33,18 @@ The WaterMeterKit uses a magnetic sensor to detect the rotating element on your 
 3. **Onboarding**:
    - Connect to the `watermeterkit` hotspot if WiFi is not configured.
    - Use Improv Serial for provisioning via USB.
+
+## Troubleshooting: OTA Update Failed
+
+If you see the error `ESP does not have enough space to store OTA file`, this is due to ESP8266 1MB flash limitations. 
+
+**Solution:** Flash the firmware via USB using our web-based flash tool:
+1. Connect your WaterMeterKit via USB-C to your computer
+2. Go to https://smarthomeshop.io/en/firmware
+3. Select WaterMeterKit and click "Connect"
+4. Flash the latest firmware
+
+After flashing via USB, future OTA updates via ESPHome Dashboard should work normally.
 
 Please check for full documentation our quick start guide: https://smarthomeshop.io/quick-start-watermeterkit
 

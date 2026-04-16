@@ -44,6 +44,11 @@ V1 supports easy WiFi setup via:
 - **Captive Portal**: Connect to the `watermeterkit` hotspot and configure WiFi
 - **Improv Serial**: Configure via USB connection
 
+## Water Meter Total
+
+V1 now includes a `Water Meter Initial Value` setting and an absolute `Water Meter Total` sensor.
+Set the initial value once to match the physical meter, then use `Water Meter Total` as the real meter reading after reboots and OTA updates.
+
 ## OTA Updates
 
 Firmware updates are done via the ESPHome Dashboard in Home Assistant:

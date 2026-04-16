@@ -17,36 +17,37 @@ Compatibility guide: https://watermeterkit.nl/en
 - Real-time water usage tracking with pulse meter sensing
 - Temperature and humidity sensing with HDC1080
 - WiFi onboarding with captive portal fallback
-- Improv Serial provisioning over USB
 - Fully local operation with Home Assistant and ESPHome
 
 ## Hardware Versions
 
 | Version | Chip | Connectivity | Description |
 |---------|------|--------------|-------------|
-| V1 | ESP8266 | WiFi | Compact water meter sensor for analog water meters |
+| V2 | ESP8266 | WiFi | Current ESP8266 hardware revision for analog water meters |
+| V3 | ESP32-C6 | WiFi | Latest hardware revision with ESP32-C6 |
 
 ## Variants
 
-We publish one customer-facing firmware variant for the current hardware revision.
+We publish one customer-facing firmware variant per hardware revision.
 
 | Hardware | Variant | Description |
 |----------|---------|-------------|
-| V1 (ESP8266) | WiFi | Standard WiFi firmware with captive portal and Improv Serial |
+| V2 (ESP8266) | WiFi | Standard WiFi firmware with captive portal and Improv Serial |
+| V3 (ESP32-C6) | WiFi | Standard WiFi firmware for the ESP32-C6 platform |
 
 ## Getting Started
 
 1. Install the WaterMeterKit on your water meter.
 2. Flash the firmware with the web flasher or ESPHome CLI.
 3. If WiFi is not configured yet, connect to the fallback hotspot.
-4. Use Improv Serial over USB if you prefer wired provisioning.
+4. On V2 hardware, you can also use Improv Serial over USB for wired provisioning.
 
 Web flasher: https://smarthomeshop.io/en/firmware
 Quick start guide: https://smarthomeshop.io/quick-start-watermeterkit
 
 ## OTA Note
 
-If you see the error `ESP does not have enough space to store OTA file`, that is caused by ESP8266 1MB flash limitations.
+If you see the error `ESP does not have enough space to store OTA file`, that applies to the ESP8266-based V2 hardware because of its 1MB flash limitations.
 
 For recovery or reflashing, use the USB web flasher:
 - Connect the WaterMeterKit via USB-C
@@ -62,11 +63,9 @@ For recovery or reflashing, use the USB web flasher:
 
 ```text
 watermeterkit/
-├── watermeterkit-v1/       # V1 ESPHome configurations
-│   ├── base.yaml           # Shared configuration
-│   ├── watermeterkit.yaml  # Main WiFi firmware
-│   └── wifi.yaml
-├── .github/workflows/      # Build and release automation
+├── watermeterkit-v1/       # Legacy V1 naming kept for backwards compatibility
+├── watermeterkit-v2/       # V2 ESP8266 ESPHome configurations
+├── watermeterkit-v3/       # V3 ESP32-C6 ESPHome configurations
 ├── CHANGELOG.md            # Customer-facing firmware notes
 └── images/
 ```
@@ -75,7 +74,8 @@ watermeterkit/
 
 Pre-built firmware manifests are published on the `gh-pages` branch.
 
-- V1 WiFi: `watermeterkit-v1-manifest.json`
+- V2 WiFi: `watermeterkit-v2-manifest.json`
+- V3 WiFi: `watermeterkit-v3-manifest.json`
 
 ## Sensors
 

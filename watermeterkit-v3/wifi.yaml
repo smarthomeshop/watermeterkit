@@ -1,0 +1,16 @@
+# WaterMeterKit V3 - WiFi Network Configuration
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: "WaterMeterKit-C6"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 60s

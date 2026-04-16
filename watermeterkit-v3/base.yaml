@@ -1,0 +1,179 @@
+# WaterMeterKit V3 - Base Configuration
+# ESP32-C6 with 4MB flash
+
+substitutions:
+  # Product identification
+  device_name: watermeterkit-c6
+  friendly_name: WaterMeterKit
+  software_version: "2.1"
+  hardware_version: "V3"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: "smarthomeshop.watermeterkit"
+    version: ${software_version}
+
+esp32:
+  board: esp32-c6-devkitc-1
+  framework:
+    type: esp-idf
+  flash_size: 4MB
+
+# === Core Components ===
+logger:
+  baud_rate: 115200
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+web_server:
+  port: 80
+
+# === Device Controls ===
+switch:
+  - platform: restart
+    id: switch_restart
+    name: "${friendly_name} Restart"
+
+button:
+  - platform: factory_reset
+    name: "${friendly_name} Factory Reset"
+    entity_category: config
+    disabled_by_default: true
+
+# === Status LED ===
+status_led:
+  pin: GPIO1
+
+# === LED Outputs ===
+output:
+  - platform: ledc
+    id: output_led_green
+    pin: GPIO0
+
+  - platform: ledc
+    id: output_led_blue
+    pin: GPIO7
+
+light:
+  - platform: monochromatic
+    id: light_led_green
+    internal: true
+    output: output_led_green
+
+  - platform: monochromatic
+    id: light_led_blue
+    internal: true
+    output: output_led_blue
+
+# === I2C Bus ===
+i2c:
+  sda: GPIO5
+  scl: GPIO4
+  scan: true
+
+# === Time ===
+time:
+  - platform: homeassistant
+    id: time_homeassistant
+    on_time_sync:
+      then:
+        - component.update: sensor_uptime_timestamp
+
+# === Sensors ===
+sensor:
+  # Uptime
+  - platform: uptime
+    id: sensor_uptime
+    name: "${friendly_name} Uptime Seconds"
+    internal: true
+
+  # Boot timestamp / uptime timestamp
+  - platform: template
+    id: sensor_uptime_timestamp
+    name: "${friendly_name} Uptime"
+    device_class: timestamp
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      if (!id(time_homeassistant).now().is_valid()) {
+        return {};
+      }
+      return id(time_homeassistant).now().timestamp - id(sensor_uptime).state;
+
+  # === Pulse Meter (Water Flow Sensor) ===
+  - platform: pulse_meter
+    id: sensor_pulse_meter
+    name: "${friendly_name} Current Usage"
+    icon: mdi:water-pump
+    unit_of_measurement: "L/min"
+    accuracy_decimals: 1
+    timeout: 2min
+    internal_filter: 200ms
+    internal_filter_mode: PULSE
+    pin:
+      number: GPIO6
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - multiply: 1.0
+    total:
+      id: sensor_pulse_meter_total
+      name: "${friendly_name} Total Consumption"
+      icon: mdi:cube-outline
+      unit_of_measurement: "m³"
+      state_class: total_increasing
+      device_class: water
+      accuracy_decimals: 3
+      filters:
+        - multiply: 0.001
+    on_value:
+      then:
+        - light.turn_on:
+            id: light_led_green
+            brightness: 100%
+        - delay: 1s
+        - light.turn_off: light_led_green
+
+  # === HDC1080 Temperature & Humidity Sensor ===
+  - platform: hdc1080
+    temperature:
+      id: sensor_temperature
+      name: "${friendly_name} Temperature"
+      filters:
+        - offset: -5.5
+    humidity:
+      id: sensor_humidity
+      name: "${friendly_name} Humidity"
+      filters:
+        - offset: 12.0
+    update_interval: 60s
+
+# === Text Sensors ===
+text_sensor:
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"
+
+  - platform: template
+    id: text_sensor_watermeterkit_software_version
+    name: "${friendly_name} Software Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${software_version}"};
+
+  - platform: template
+    id: text_sensor_watermeterkit_hardware_version
+    name: "${friendly_name} Hardware Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${hardware_version}"};

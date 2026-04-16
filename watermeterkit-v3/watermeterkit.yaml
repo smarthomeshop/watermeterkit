@@ -10,3 +10,4 @@ packages:
 
 dashboard_import:
   package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v3/watermeterkit.yaml@main
+  import_full_config: false

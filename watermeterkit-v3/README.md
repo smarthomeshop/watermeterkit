@@ -7,7 +7,7 @@ Hardware version V3 is based on the **ESP32-C6**.
 | Component | Details |
 |-----------|---------|
 | **MCU** | ESP32-C6 |
-| **Connectivity** | WiFi |
+| **Connectivity** | WiFi + Bluetooth LE |
 | **Water Meter Interface** | Pulse meter sensor |
 | **Sensors** | HDC1080 (Temp/Humidity) |
 | **Status LED** | GPIO1 |
@@ -41,6 +41,6 @@ packages:
 
 ## Notes
 
-- OTA and API credentials are read from `secrets.yaml`.
-- The fallback access point is named `WaterMeterKit-C6`.
-- Required secrets for this package are `wifi_ssid`, `wifi_password`, `api_encryption_key`, `ota_password`, and `fallback_ap_password`.
+- Initial onboarding is handled through captive portal, Improv BLE, or Improv Serial.
+- HTTP OTA updates are exposed through the firmware update entity.
+- The fallback access point uses the device name as SSID and password.

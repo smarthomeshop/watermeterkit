@@ -7,6 +7,7 @@ substitutions:
   friendly_name: WaterMeterKit
   software_version: "2.1"
   hardware_version: "V3"
+  wifi_update_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v3-manifest.json"
 
 esphome:
   name: ${device_name}
@@ -27,12 +28,12 @@ logger:
   baud_rate: 115200
 
 api:
-  encryption:
-    key: !secret api_encryption_key
 
 ota:
   - platform: esphome
-    password: !secret ota_password
+    id: ota_esphome
+  - platform: http_request
+    id: ota_http_request
 
 web_server:
   port: 80
@@ -45,6 +46,7 @@ switch:
 
 button:
   - platform: factory_reset
+    id: button_factory_reset
     name: "${friendly_name} Factory Reset"
     entity_category: config
     disabled_by_default: true
@@ -87,6 +89,15 @@ time:
     on_time_sync:
       then:
         - component.update: sensor_uptime_timestamp
+
+http_request:
+  useragent: watermeterkit-esphome
+
+update:
+  - platform: http_request
+    id: firmware_update
+    name: "${friendly_name} Firmware"
+    source: ${wifi_update_manifest_url}
 
 # === Sensors ===
 sensor:

@@ -2,57 +2,80 @@
 
 ![WaterMeterKit](images/watermeterkit-product-shop.png)
 
-WaterMeterKit is a compact water meter sensor designed to monitor your water consumption in real-time. It integrates seamlessly with Home Assistant via ESPHome and runs fully local (no cloud required).
+WaterMeterKit is a compact ESPHome-based water meter sensor for Home Assistant. It measures real-time water usage from compatible analog water meters and is designed for fully local operation without cloud dependencies.
 
-## How it works
+Product page: https://watermeterkit.nl/en
+
+## How It Works
 
 The WaterMeterKit uses a magnetic sensor to detect the rotating element on your analog water meter, counting each liter that passes through. Compatible with most major water meter brands including Actaris, Elster, Honeywell, Itron, Sensus and more.
 
-👉 **Check compatibility for your water meter**: https://watermeterkit.nl/en
+Compatibility guide: https://watermeterkit.nl/en
 
-## Key features
+## Key Features
 
-- **Water flow monitoring**: Real-time water usage tracking with pulse meter sensor.
-- **Environment sensing**: Temperature and humidity measurement.
-- **Connectivity**: Wi-Fi with captive portal fallback.
-- **Provisioning**: Improv Serial and captive portal for easy setup.
-- **Local only**: Works without cloud services (100% local).
+- Real-time water usage tracking with pulse meter sensing
+- Temperature and humidity sensing with HDC1080
+- WiFi onboarding with captive portal fallback
+- Improv Serial provisioning over USB
+- Fully local operation with Home Assistant and ESPHome
 
-## Hardware versions
+## Hardware Versions
 
-| Version | Chip | Connectivity |
-|---------|------|--------------|
-| V1 | ESP8266 | WiFi |
+| Version | Chip | Connectivity | Description |
+|---------|------|--------------|-------------|
+| V1 | ESP8266 | WiFi | Compact water meter sensor for analog water meters |
 
-## Getting started
+## Variants
 
-1. **Hardware**: Install the WaterMeterKit on your water meter.
-2. **Flash firmware**:
-   - Use our web-based flash tool at https://smarthomeshop.io/en/firmware to flash or re-flash your kit.
-   - Or compile/flash locally with ESPHome CLI.
-3. **Onboarding**:
-   - Connect to the `watermeterkit` hotspot if WiFi is not configured.
-   - Use Improv Serial for provisioning via USB.
+We publish one customer-facing firmware variant for the current hardware revision.
 
-## Troubleshooting: OTA Update Failed
+| Hardware | Variant | Description |
+|----------|---------|-------------|
+| V1 (ESP8266) | WiFi | Standard WiFi firmware with captive portal and Improv Serial |
 
-If you see the error `ESP does not have enough space to store OTA file`, this is due to ESP8266 1MB flash limitations. 
+## Getting Started
 
-**Solution:** Flash the firmware via USB using our web-based flash tool:
-1. Connect your WaterMeterKit via USB-C to your computer
-2. Go to https://smarthomeshop.io/en/firmware
-3. Select WaterMeterKit and click "Connect"
-4. Flash the latest firmware
+1. Install the WaterMeterKit on your water meter.
+2. Flash the firmware with the web flasher or ESPHome CLI.
+3. If WiFi is not configured yet, connect to the fallback hotspot.
+4. Use Improv Serial over USB if you prefer wired provisioning.
 
-After flashing via USB, future OTA updates via ESPHome Dashboard should work normally.
+Web flasher: https://smarthomeshop.io/en/firmware
+Quick start guide: https://smarthomeshop.io/quick-start-watermeterkit
 
-Please check for full documentation our quick start guide: https://smarthomeshop.io/quick-start-watermeterkit
+## OTA Note
 
-## Repository layout
+If you see the error `ESP does not have enough space to store OTA file`, that is caused by ESP8266 1MB flash limitations.
 
-- `watermeterkit-v1/` — ESPHome configurations for hardware V1
-- `.github/workflows/` — CI to build and publish firmware to `gh-pages`
-- `gh-pages` branch — public firmware and manifests (for OTA and ESP Web Tools)
+For recovery or reflashing, use the USB web flasher:
+- Connect the WaterMeterKit via USB-C
+- Open https://smarthomeshop.io/en/firmware
+- Select WaterMeterKit and flash the latest firmware
+
+## Version History
+
+- Customer-facing release notes: [CHANGELOG.md](CHANGELOG.md)
+- GitHub Releases: https://github.com/smarthomeshop/watermeterkit/releases
+
+## Repository Layout
+
+```text
+watermeterkit/
+├── watermeterkit-v1/       # V1 ESPHome configurations
+│   ├── base.yaml           # Shared configuration
+│   ├── watermeterkit.yaml  # Main WiFi firmware
+│   └── wifi.yaml
+├── .github/workflows/      # Build and release automation
+├── CHANGELOG.md            # Customer-facing firmware notes
+└── images/
+```
+
+## Firmware Downloads
+
+Pre-built firmware manifests are published on the `gh-pages` branch.
+
+- V1 WiFi: `watermeterkit-v1-manifest.json`
 
 ## Sensors
 
@@ -73,11 +96,11 @@ PRs and issues are welcome. Please keep changes modular and follow ESPHome best 
 
 - Product info and guides: https://watermeterkit.nl/en
 - Store: https://smarthomeshop.io
-- Community & support (Discord): https://smarthomeshop.io/discord
+- Community and support: https://smarthomeshop.io/discord
 
 ## License
 
-This project is released under the CC BY‑NC 4.0 license
+This project is released under the CC BY-NC 4.0 license.
 
 
 ![WaterMeterKit](images/watermeterkit-inthebox-shop.png)

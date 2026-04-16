@@ -83,10 +83,22 @@ Pre-built firmware manifests are published on the `gh-pages` branch.
 |--------|-------------|
 | Current Usage | Water flow rate in L/min |
 | Total Consumption | Cumulative water usage in m³ |
+| Water Meter Initial Value | Configurable starting point that matches the physical meter |
+| Water Meter Total | Absolute water meter reading that survives reboots and OTA updates |
 | Temperature | Environment temperature |
 | Humidity | Environment humidity |
 | WiFi Signal | WiFi signal strength |
 | Uptime | Device uptime |
+
+## Water Meter Total
+
+WaterMeterKit V1 and V2 store an absolute water meter total so the reading survives reboots and firmware updates.
+
+1. Read the current value on your physical water meter.
+2. Enter that value in `Water Meter Initial Value` in Home Assistant.
+3. Use `Water Meter Total` as the absolute meter reading going forward.
+
+To reduce flash wear on the ESP8266 hardware, the value is batched during normal use and also saved on clean restarts or OTA updates.
 
 ## Contributing
 

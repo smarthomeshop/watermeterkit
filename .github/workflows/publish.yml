@@ -384,6 +384,36 @@ jobs:
       - name: Create output directory
         run: mkdir -p output
 
+      - name: Seed output from current gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch --depth=1 origin gh-pages
+            git worktree add --detach existing-pages FETCH_HEAD
+            rsync -a --exclude='.git' existing-pages/ output/
+            git worktree remove existing-pages --force
+          fi
+
+      - name: Remove stale V1 output
+        if: needs.build-v1.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v1
+          rm -f output/watermeterkit-v1-manifest.json
+
+      - name: Remove stale V2 output
+        if: needs.build-v2.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v2
+          rm -f output/watermeterkit-v2-manifest.json
+
+      - name: Remove stale V3 output
+        if: needs.build-v3.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v3
+          rm -f output/watermeterkit-v3-manifest.json
+
       - name: Download V1 artifact
         if: needs.build-v1.result == 'success'
         uses: actions/download-artifact@v4
@@ -460,15 +490,18 @@ jobs:
           - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
           EOF
 
+      - name: Ensure Pages metadata
+        run: touch output/.nojekyll
+
       - name: Debug output structure
-        run: find output -maxdepth 2 -type f | sort
+        run: find output -maxdepth 3 -type f | sort
 
       - name: Deploy to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: output
-          clean: false
+          clean: true
           force: false
           attempt-limit: 6
 

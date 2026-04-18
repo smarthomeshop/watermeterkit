@@ -114,16 +114,26 @@ jobs:
           version: ${{ inputs.esphome_version }}
 
       - name: Collect outputs
+        shell: bash
         run: |
-          mkdir output
-          mv "${{ steps.esphome-build.outputs.name }}" temp
-          mv temp "${{ inputs.directory_name }}"
-          mv "${{ inputs.directory_name }}" output/
+          set -euo pipefail
+
+          BUILD_DIR="${{ steps.esphome-build.outputs.name }}"
+          TARGET_DIR="artifacts/${{ inputs.directory_name }}"
+
+          if [[ ! -d "$BUILD_DIR" ]]; then
+            echo "Expected build directory '$BUILD_DIR' was not found"
+            exit 1
+          fi
+
+          mkdir -p "$TARGET_DIR"
+          shopt -s dotglob nullglob
+          mv "$BUILD_DIR"/* "$TARGET_DIR"/
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.name }}
-          path: output
+          path: artifacts
 
   publish:
     if: inputs.deploy_to_pages && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

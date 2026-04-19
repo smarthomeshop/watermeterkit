@@ -3,7 +3,7 @@
 
 substitutions:
   # Product identification
-  device_name: watermeterkit-c6
+  device_name: watermeterkit
   friendly_name: WaterMeterKit
   software_version: "2.2"
   hardware_version: "V3"

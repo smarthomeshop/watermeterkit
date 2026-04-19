@@ -1,8 +1,14 @@
 # WaterMeterKit V3 - WiFi Network Configuration
 
 wifi:
+  # No WiFi credentials are embedded in the firmware.
+  # Users can onboard with:
+  # - Captive Portal via the fallback AP
+  # - Improv Serial over USB
+  # - Improv BLE
   ap:
     ssid: ${device_name}
+    password: ${device_name}
 
 captive_portal:
 

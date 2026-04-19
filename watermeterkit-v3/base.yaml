@@ -16,12 +16,64 @@ esphome:
   project:
     name: "smarthomeshop.watermeterkit"
     version: ${software_version}
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(water_pulse_offset) = 0.0;
+            id(water_meter_initial).publish_state(id(water_total_persistent));
+        - component.update: sensor_water_meter_total
+  on_shutdown:
+    priority: -100
+    then:
+      - lambda: |-
+          if (!id(sensor_pulse_meter_total).has_state() || isnan(id(sensor_pulse_meter_total).state)) {
+            ESP_LOGW("water", "Skipping shutdown save: water pulse total unavailable");
+            return;
+          }
+
+          float pulses_since_offset = id(sensor_pulse_meter_total).state - id(water_pulse_offset);
+          if (pulses_since_offset > 0) {
+            id(water_total_persistent) += pulses_since_offset;
+            id(water_pulse_offset) = id(sensor_pulse_meter_total).state;
+            ESP_LOGI("water", "Water total saved on shutdown: %.3f m³", id(water_total_persistent));
+          }
 
 esp32:
   board: esp32-c6-devkitc-1
   framework:
     type: esp-idf
   flash_size: 4MB
+
+preferences:
+  flash_write_interval: 30min
+
+globals:
+  - id: water_total_persistent
+    type: float
+    restore_value: true
+    initial_value: "0.0"
+
+  - id: water_pulse_offset
+    type: float
+    restore_value: false
+    initial_value: "0.0"
+
+interval:
+  - interval: 5min
+    then:
+      - lambda: |-
+          if (!id(sensor_pulse_meter_total).has_state() || isnan(id(sensor_pulse_meter_total).state)) {
+            ESP_LOGV("water", "Skipping periodic save: water pulse total unavailable");
+            return;
+          }
+
+          float pulses_since_offset = id(sensor_pulse_meter_total).state - id(water_pulse_offset);
+          if (pulses_since_offset >= 0.05) {
+            id(water_total_persistent) += pulses_since_offset;
+            id(water_pulse_offset) = id(sensor_pulse_meter_total).state;
+            ESP_LOGI("water", "Water total saved to flash: %.3f m³ (+%.3f m³)", id(water_total_persistent), pulses_since_offset);
+          }
 
 # === Core Components ===
 logger:
@@ -68,6 +120,32 @@ button:
     name: "${friendly_name} Factory Reset"
     entity_category: config
     disabled_by_default: true
+
+number:
+  - platform: template
+    id: water_meter_initial
+    name: "${friendly_name} Water Meter Initial Value"
+    icon: "mdi:water-plus"
+    unit_of_measurement: "m³"
+    device_class: water
+    entity_category: config
+    optimistic: true
+    min_value: 0
+    max_value: 100000
+    step: 0.001
+    mode: box
+    set_action:
+      then:
+        - lambda: |-
+            id(water_total_persistent) = x;
+            if (id(sensor_pulse_meter_total).has_state() && !isnan(id(sensor_pulse_meter_total).state)) {
+              id(water_pulse_offset) = id(sensor_pulse_meter_total).state;
+            } else {
+              id(water_pulse_offset) = 0.0;
+            }
+            global_preferences->sync();
+            id(sensor_water_meter_total).update();
+            ESP_LOGI("water", "Water meter initial value saved immediately: %.3f m³", x);
 
 # === Status LED ===
 status_led:
@@ -177,6 +255,28 @@ sensor:
             brightness: 100%
         - delay: 1s
         - light.turn_off: light_led_green
+        - component.update: sensor_water_meter_total
+
+  - platform: template
+    id: sensor_water_meter_total
+    name: "${friendly_name} Water Meter Total"
+    icon: "mdi:water-check"
+    unit_of_measurement: "m³"
+    state_class: total_increasing
+    device_class: water
+    accuracy_decimals: 3
+    update_interval: 60s
+    lambda: |-
+      if (!id(sensor_pulse_meter_total).has_state() || isnan(id(sensor_pulse_meter_total).state)) {
+        return id(water_total_persistent);
+      }
+
+      float current_delta = id(sensor_pulse_meter_total).state - id(water_pulse_offset);
+      if (current_delta < 0.0) {
+        current_delta = 0.0;
+      }
+
+      return id(water_total_persistent) + current_delta;
 
   # === HDC1080 Temperature & Humidity Sensor ===
   - platform: hdc1080

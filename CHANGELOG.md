@@ -7,6 +7,10 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 ## [Unreleased]
 
 - Add customer-facing changes here before the next release is published.
+
+## [WaterMeterKit V3 2.6] - 2026-04-19
+
+
 - Hardware naming has been corrected so the ESP8266-based WaterMeterKit is now published as V2.
 - Initial WaterMeterKit V3 firmware track has been added for the ESP32-C6 hardware revision.
 - WaterMeterKit V3 now includes Improv BLE, Improv Serial, and HTTP OTA update support for Made for ESPHome submission readiness.
@@ -15,6 +19,7 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 - WaterMeterKit V3 has been simplified to a single WiFi-only configuration file; the separate `wifi.yaml` mixin and unused `default_network` substitution were removed.
 - WaterMeterKit V3 now also includes `Water Meter Initial Value` and the persistent absolute `Water Meter Total` sensor, matching the V1/V2 behavior.
 - WaterMeterKit V1 and V2 now include a persistent `Water Meter Initial Value` setting and absolute `Water Meter Total` sensor that survive reboots and OTA updates.
+
 
 ## [WaterMeterKit V1 1.6] - 2026-04-01
 

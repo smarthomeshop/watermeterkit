@@ -11,6 +11,7 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 - Initial WaterMeterKit V3 firmware track has been added for the ESP32-C6 hardware revision.
 - WaterMeterKit V3 now includes Improv BLE, Improv Serial, and HTTP OTA update support for Made for ESPHome submission readiness.
 - WaterMeterKit V3 now uses the product device name `watermeterkit` again and keeps captive portal / Improv onboarding aligned with the working CeilSense setup.
+- WaterMeterKit V3 now routes serial logging and Improv Serial over `UART0` for boards that use the CP2102 USB-to-UART bridge.
 - WaterMeterKit V1 and V2 now include a persistent `Water Meter Initial Value` setting and absolute `Water Meter Total` sensor that survive reboots and OTA updates.
 
 ## [WaterMeterKit V1 1.6] - 2026-04-01

@@ -26,6 +26,7 @@ esp32:
 # === Core Components ===
 logger:
   baud_rate: 115200
+  hardware_uart: UART0
 
 api:
 

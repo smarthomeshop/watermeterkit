@@ -262,6 +262,79 @@ jobs:
         run: |
           set -euo pipefail
 
+          finalize_changelog() {
+            local unreleased_notes
+            local release_blocks
+            local release_date
+
+            unreleased_notes=$(mktemp)
+            release_blocks=$(mktemp)
+            release_date=$(TZ=Europe/Amsterdam date +%Y-%m-%d)
+
+            awk '
+              $0 == "## [Unreleased]" { found=1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md \
+              | sed '/^- Add customer-facing changes here before the next release is published\.$/d' \
+              > "$unreleased_notes"
+
+            if ! grep -q '[^[:space:]]' "$unreleased_notes"; then
+              echo "No unreleased changelog notes to finalize"
+              rm -f "$unreleased_notes" "$release_blocks"
+              return
+            fi
+
+            if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+              {
+                printf '## [WaterMeterKit V1 %s] - %s\n\n' "${{ steps.versions.outputs.v1_version }}" "$release_date"
+                cat "$unreleased_notes"
+                printf '\n'
+              } >> "$release_blocks"
+            fi
+
+            if [[ "${{ steps.changes.outputs.v2 }}" == "true" ]]; then
+              {
+                printf '## [WaterMeterKit V2 %s] - %s\n\n' "${{ steps.versions.outputs.v2_version }}" "$release_date"
+                cat "$unreleased_notes"
+                printf '\n'
+              } >> "$release_blocks"
+            fi
+
+            if [[ "${{ steps.changes.outputs.v3 }}" == "true" ]]; then
+              {
+                printf '## [WaterMeterKit V3 %s] - %s\n\n' "${{ steps.versions.outputs.v3_version }}" "$release_date"
+                cat "$unreleased_notes"
+                printf '\n'
+              } >> "$release_blocks"
+            fi
+
+            awk -v blocks_file="$release_blocks" '
+              BEGIN { in_unreleased=0 }
+              $0 == "## [Unreleased]" {
+                print
+                print ""
+                print "- Add customer-facing changes here before the next release is published."
+                print ""
+                while ((getline line < blocks_file) > 0) {
+                  print line
+                }
+                in_unreleased=1
+                next
+              }
+              in_unreleased && /^## \[/ {
+                in_unreleased=0
+                print
+                next
+              }
+              in_unreleased { next }
+              { print }
+            ' CHANGELOG.md > CHANGELOG.md.tmp
+
+            mv CHANGELOG.md.tmp CHANGELOG.md
+            rm -f "$unreleased_notes" "$release_blocks"
+          }
+
           create_tag() {
             local tag_name=$1
 
@@ -292,10 +365,14 @@ jobs:
             changes_made=true
           fi
 
+          if [[ "$changes_made" == "true" ]]; then
+            finalize_changelog
+          fi
+
           if [[ "$changes_made" == "true" ]] && ! git diff --quiet; then
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
-            git add watermeterkit-v*/base.yaml
+            git add CHANGELOG.md watermeterkit-v*/base.yaml
 
             msg="chore: update versions"
             [[ "${{ steps.changes.outputs.v1 }}" == "true" ]] && msg="$msg V1=${{ steps.versions.outputs.v1_version }}"

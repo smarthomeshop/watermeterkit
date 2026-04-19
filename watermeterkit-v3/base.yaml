@@ -30,6 +30,23 @@ logger:
 
 api:
 
+wifi:
+  # No WiFi credentials are embedded in the firmware.
+  # Users can onboard with:
+  # - Captive Portal via the fallback AP
+  # - Improv Serial over USB
+  # - Improv BLE
+  ap:
+    ssid: ${device_name}
+    password: ${device_name}
+
+captive_portal:
+
+esp32_improv:
+  authorizer: none
+
+improv_serial:
+
 ota:
   - platform: esphome
     id: ota_esphome
@@ -102,6 +119,11 @@ update:
 
 # === Sensors ===
 sensor:
+  - platform: wifi_signal
+    id: sensor_wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 60s
+
   # Uptime
   - platform: uptime
     id: sensor_uptime
@@ -172,6 +194,18 @@ sensor:
 
 # === Text Sensors ===
 text_sensor:
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip_address
+      name: "${friendly_name} IP Address"
+      entity_category: diagnostic
+      disabled_by_default: true
+    mac_address:
+      id: wifi_mac_address
+      name: "${friendly_name} MAC Address"
+      entity_category: diagnostic
+      disabled_by_default: true
+
   - platform: version
     id: text_sensor_version
     name: "${friendly_name} ESPHome Version"

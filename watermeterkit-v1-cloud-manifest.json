@@ -1,0 +1,21 @@
+{
+  "name": "WaterMeterKit V1 Cloud",
+  "version": "1.8",
+  "home_assistant_domain": "esphome",
+  "new_install_skip_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "ota": {
+        "path": "watermeterkit-v1-cloud/watermeterkit-esp8266.ota.bin",
+        "md5": "781d303faf9dfb2363a7ffa2cbd2a72d"
+      },
+      "parts": [
+        {
+          "path": "watermeterkit-v1-cloud/watermeterkit-esp8266.factory.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

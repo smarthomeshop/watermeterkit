@@ -11,6 +11,9 @@ Any manual changes will be overwritten on the next publish.
 
 ## Layout
 - `watermeterkit-v1/`
+- `watermeterkit-v1-cloud/`
 - `watermeterkit-v2/`
+- `watermeterkit-v2-cloud/`
 - `watermeterkit-v3/`
+- `watermeterkit-v3-cloud/`
 - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools

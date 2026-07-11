@@ -7,6 +7,7 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 ## [Unreleased]
 
 - Add customer-facing changes here before the next release is published.
+- Added local Thread firmware for WaterMeterKit V3, plus separate WiFi and SmartHomeShop Cloud package variants.
 
 ## [WaterMeterKit V3 2.6] - 2026-04-19
 

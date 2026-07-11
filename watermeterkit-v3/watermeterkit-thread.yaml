@@ -1,0 +1,19 @@
+# WaterMeterKit V3 Thread Configuration
+# Local / Home Assistant only: connects through your Thread border router,
+# no WiFi and no SmartHomeShop cloud. See thread.yaml for details.
+#
+# Before installing: replace the thread_dataset placeholder below with the
+# Active dataset TLVs of your Thread network (Home Assistant -> Settings ->
+# Devices & Services -> Thread -> Configure -> information icon).
+# The first install must be done over USB.
+
+substitutions:
+  thread_dataset: "PASTE_YOUR_THREAD_DATASET_TLVS_HERE"
+
+packages:
+  base: !include base.yaml
+  net: !include thread.yaml
+
+dashboard_import:
+  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v3/watermeterkit-thread.yaml@main
+  import_full_config: false

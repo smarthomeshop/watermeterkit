@@ -1,17 +1,19 @@
-# WaterMeterKit V3 Configuration
-# Main entry point for V3 firmware (WiFi only)
+# WaterMeterKit V3 Cloud Configuration
+# Includes local Home Assistant support plus SmartHomeShop cloud sync over HTTP POST.
 
 substitutions:
-  # SmartHomeShop setup portal (default_network comes from base.yaml)
+  wifi_update_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v3-cloud-manifest.json"
+  default_network: "WiFi + SmartHomeShop App (cloud)"
+  # SmartHomeShop setup portal
   setup_product_name: "WaterMeterKit"
-  setup_product_variant: "V3 WiFi"
+  setup_product_variant: "V3 WiFi + SmartHomeShop App"
   setup_support_cloud: "true"
   setup_support_home_assistant: "true"
   setup_support_mqtt: "false"
   setup_support_homey: "true"
   setup_support_ethernet: "false"
   setup_support_firmware_selector: "true"
-  setup_default_cloud_enabled: "false"
+  setup_default_cloud_enabled: "true"
   setup_default_home_assistant_enabled: "true"
   setup_default_mqtt_enabled: "false"
   setup_firmware_options: "WiFi (local)|WiFi + SmartHomeShop App (cloud)"
@@ -20,9 +22,10 @@ substitutions:
 packages:
   base: !include base.yaml
   net: !include wifi.yaml
+  cloud: !include cloud.yaml
   setup_portal: github://smarthomeshop/setup-portal/packages/setup-portal.yaml@main
   setup_portal_bridge: github://smarthomeshop/setup-portal/packages/firmware-selector-bridge.yaml@main
 
 dashboard_import:
-  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v3/watermeterkit.yaml@main
+  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v3/watermeterkit-cloud.yaml@main
   import_full_config: false

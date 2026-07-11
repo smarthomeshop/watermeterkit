@@ -1,0 +1,14 @@
+# WaterMeterKit V1 Cloud Configuration
+# Includes local Home Assistant support plus SmartHomeShop cloud sync over HTTP POST.
+
+substitutions:
+  wifi_update_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v1-cloud-manifest.json"
+
+packages:
+  base: !include base.yaml
+  wifi: !include wifi.yaml
+  cloud: !include cloud.yaml
+
+dashboard_import:
+  package_import_url: github://smarthomeshop/watermeterkit/watermeterkit-v1/watermeterkit-cloud.yaml@main
+  import_full_config: false

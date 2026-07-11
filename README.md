@@ -24,7 +24,7 @@ Compatibility guide: https://watermeterkit.nl/en
 | Version | Chip | Connectivity | Description |
 |---------|------|--------------|-------------|
 | V2 | ESP8266 | WiFi | Current ESP8266 hardware revision for analog water meters |
-| V3 | ESP32-C6 | WiFi | Latest hardware revision with ESP32-C6 |
+| V3 | ESP32-C6 | WiFi, Cloud or Thread | Latest hardware revision with ESP32-C6 |
 
 ## Variants
 
@@ -33,12 +33,14 @@ We publish one customer-facing firmware variant per hardware revision.
 | Hardware | Variant | Description |
 |----------|---------|-------------|
 | V2 (ESP8266) | WiFi | Standard WiFi firmware with captive portal and Improv Serial |
-| V3 (ESP32-C6) | WiFi | Standard WiFi firmware for the ESP32-C6 platform |
+| V3 (ESP32-C6) | WiFi | Standard local WiFi firmware for the ESP32-C6 platform |
+| V3 (ESP32-C6) | Cloud | WiFi firmware with optional SmartHomeShop Cloud support |
+| V3 (ESP32-C6) | Thread | Local Thread firmware for an existing Thread network |
 
 ## Getting Started
 
 1. Install the WaterMeterKit on your water meter.
-2. Flash the firmware with the web flasher or ESPHome CLI.
+2. Flash the WiFi/Cloud firmware with the web flasher or ESPHome CLI.
 3. If WiFi is not configured yet, connect to the fallback hotspot.
 4. On V2 hardware, you can also use Improv Serial over USB for wired provisioning.
 
@@ -76,6 +78,9 @@ Pre-built firmware manifests are published on the `gh-pages` branch.
 
 - V2 WiFi: `watermeterkit-v2-manifest.json`
 - V3 WiFi: `watermeterkit-v3-manifest.json`
+- V3 Cloud: `watermeterkit-v3-cloud-manifest.json`
+
+Thread firmware is not published as a universal binary because the Thread Active dataset belongs to each user's network. Use the V3 Thread package in ESPHome and install it over USB.
 
 ## Sensors
 
@@ -92,7 +97,7 @@ Pre-built firmware manifests are published on the `gh-pages` branch.
 
 ## Water Meter Total
 
-WaterMeterKit V1 and V2 store an absolute water meter total so the reading survives reboots and firmware updates.
+WaterMeterKit V1, V2 and V3 store an absolute water meter total so the reading survives reboots and firmware updates.
 
 1. Read the current value on your physical water meter.
 2. Enter that value in `Water Meter Initial Value` in Home Assistant.

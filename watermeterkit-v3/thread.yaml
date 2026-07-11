@@ -1,0 +1,23 @@
+# WaterMeterKit V3 Thread network package.
+#
+# Local / Home Assistant only: the device joins your existing Thread mesh
+# through a Thread border router (for example Home Assistant with a
+# SkyConnect / Connect ZBT-1) and is reachable over IPv6 via the native
+# ESPHome API. There is no WiFi, no fallback AP and no SmartHomeShop
+# cloud in this variant.
+#
+# The Thread network credentials come from the ${thread_dataset} TLV
+# substitution, which you copy from Home Assistant:
+#   Settings -> Devices & Services -> Thread -> Configure (cogwheel)
+#   -> information icon on your network -> Active dataset TLVs.
+#
+# Note: the "${friendly_name} Firmware Variant" selector and the firmware
+# update entity from base.yaml need internet access and therefore do not
+# work over Thread. Update this device through the ESPHome Dashboard
+# (OTA over IPv6, or USB).
+
+network:
+  enable_ipv6: true
+
+openthread:
+  tlv: ${thread_dataset}

@@ -74,8 +74,25 @@ jobs:
           fi
 
           if echo "$CHANGED_FILES" | grep -qx 'CHANGELOG.md'; then
-            echo "CHANGELOG.md updated"
-            exit 0
+            unreleased_notes=$(mktemp)
+            awk '
+              $0 == "## [Unreleased]" { found=1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md \
+              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+              | sed '/^- Add customer-facing changes here before the next release is published\.$/d' \
+              > "$unreleased_notes"
+
+            if grep -q '[^[:space:]]' "$unreleased_notes"; then
+              echo "CHANGELOG.md updated with Unreleased notes"
+              rm -f "$unreleased_notes"
+              exit 0
+            fi
+
+            rm -f "$unreleased_notes"
+            echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing note under ## [Unreleased]."
+            exit 1
           fi
 
           echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing CHANGELOG.md update."
@@ -410,6 +427,20 @@ jobs:
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
       base_path: watermeterkit-v1
 
+  build-v1-cloud:
+    name: Build WaterMeterKit V1 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: watermeterkit-v1/watermeterkit-cloud.yaml
+      name: WaterMeterKit V1 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: watermeterkit-v1-cloud
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      base_path: watermeterkit-v1
+
   build-v2:
     name: Build WaterMeterKit V2
     needs: [detect-changes]
@@ -421,6 +452,20 @@ jobs:
       clean: false
       esphome_version: latest
       directory_name: watermeterkit-v2
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      base_path: watermeterkit-v2
+
+  build-v2-cloud:
+    name: Build WaterMeterKit V2 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: watermeterkit-v2/watermeterkit-cloud.yaml
+      name: WaterMeterKit V2 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: watermeterkit-v2-cloud
       software_version: ${{ needs.detect-changes.outputs.v2_version }}
       base_path: watermeterkit-v2
 
@@ -438,21 +483,41 @@ jobs:
       software_version: ${{ needs.detect-changes.outputs.v3_version }}
       base_path: watermeterkit-v3
 
+  build-v3-cloud:
+    name: Build WaterMeterKit V3 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v3_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: watermeterkit-v3/watermeterkit-cloud.yaml
+      name: WaterMeterKit V3 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: watermeterkit-v3-cloud
+      software_version: ${{ needs.detect-changes.outputs.v3_version }}
+      base_path: watermeterkit-v3
+
   publish-gh-pages:
     name: Publish firmware to GitHub Pages
     needs:
       - detect-changes
       - build-v1
+      - build-v1-cloud
       - build-v2
+      - build-v2-cloud
       - build-v3
+      - build-v3-cloud
     if: |
       always() &&
       github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main' &&
       (
         needs.build-v1.result == 'success' ||
+        needs.build-v1-cloud.result == 'success' ||
         needs.build-v2.result == 'success' ||
-        needs.build-v3.result == 'success'
+        needs.build-v2-cloud.result == 'success' ||
+        needs.build-v3.result == 'success' ||
+        needs.build-v3-cloud.result == 'success'
       )
     runs-on: ubuntu-latest
     steps:
@@ -479,11 +544,23 @@ jobs:
           rm -rf output/watermeterkit-v1
           rm -f output/watermeterkit-v1-manifest.json
 
+      - name: Remove stale V1 Cloud output
+        if: needs.build-v1-cloud.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v1-cloud
+          rm -f output/watermeterkit-v1-cloud-manifest.json
+
       - name: Remove stale V2 output
         if: needs.build-v2.result == 'success'
         run: |
           rm -rf output/watermeterkit-v2
           rm -f output/watermeterkit-v2-manifest.json
+
+      - name: Remove stale V2 Cloud output
+        if: needs.build-v2-cloud.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v2-cloud
+          rm -f output/watermeterkit-v2-cloud-manifest.json
 
       - name: Remove stale V3 output
         if: needs.build-v3.result == 'success'
@@ -491,11 +568,24 @@ jobs:
           rm -rf output/watermeterkit-v3
           rm -f output/watermeterkit-v3-manifest.json
 
+      - name: Remove stale V3 Cloud output
+        if: needs.build-v3-cloud.result == 'success'
+        run: |
+          rm -rf output/watermeterkit-v3-cloud
+          rm -f output/watermeterkit-v3-cloud-manifest.json
+
       - name: Download V1 artifact
         if: needs.build-v1.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: WaterMeterKit V1
+          path: output
+
+      - name: Download V1 Cloud artifact
+        if: needs.build-v1-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: WaterMeterKit V1 Cloud
           path: output
 
       - name: Download V2 artifact
@@ -505,11 +595,25 @@ jobs:
           name: WaterMeterKit V2
           path: output
 
+      - name: Download V2 Cloud artifact
+        if: needs.build-v2-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: WaterMeterKit V2 Cloud
+          path: output
+
       - name: Download V3 artifact
         if: needs.build-v3.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: WaterMeterKit V3
+          path: output
+
+      - name: Download V3 Cloud artifact
+        if: needs.build-v3-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: WaterMeterKit V3 Cloud
           path: output
 
       - name: Create manifests
@@ -542,8 +646,11 @@ jobs:
           }
 
           create_manifest "watermeterkit-v1" "watermeterkit-v1-manifest.json" "WaterMeterKit V1" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "watermeterkit-v1-cloud" "watermeterkit-v1-cloud-manifest.json" "WaterMeterKit V1 Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "watermeterkit-v2" "watermeterkit-v2-manifest.json" "WaterMeterKit V2" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "watermeterkit-v2-cloud" "watermeterkit-v2-cloud-manifest.json" "WaterMeterKit V2 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "watermeterkit-v3" "watermeterkit-v3-manifest.json" "WaterMeterKit V3" "${{ needs.detect-changes.outputs.v3_version }}"
+          create_manifest "watermeterkit-v3-cloud" "watermeterkit-v3-cloud-manifest.json" "WaterMeterKit V3 Cloud" "${{ needs.detect-changes.outputs.v3_version }}"
 
       - name: Create README for gh-pages
         shell: bash
@@ -562,8 +669,11 @@ jobs:
 
           ## Layout
           - `watermeterkit-v1/`
+          - `watermeterkit-v1-cloud/`
           - `watermeterkit-v2/`
+          - `watermeterkit-v2-cloud/`
           - `watermeterkit-v3/`
+          - `watermeterkit-v3-cloud/`
           - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
           EOF
 
@@ -608,7 +718,7 @@ jobs:
             fi
 
             awk -v heading="$heading" '
-              $0 == heading { found=1; next }
+              index($0, heading) == 1 { found=1; next }
               found && /^## \[/ { exit }
               found { print }
             ' CHANGELOG.md > release-notes.txt
@@ -620,6 +730,9 @@ jobs:
                 found { print }
               ' CHANGELOG.md > release-notes.txt
             fi
+
+            sed -i '/^- Add customer-facing firmware notes here before merging a PR\.$/d' release-notes.txt
+            sed -i '/^- Add customer-facing changes here before the next release is published\.$/d' release-notes.txt
 
             if [[ ! -s release-notes.txt ]]; then
               printf '%s\n\n%s\n' \

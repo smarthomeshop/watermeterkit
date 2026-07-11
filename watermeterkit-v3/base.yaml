@@ -8,6 +8,11 @@ substitutions:
   software_version: "2.6"
   hardware_version: "V3"
   wifi_update_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v3-manifest.json"
+  # Firmware variant manifests, used by the firmware_selector to switch the
+  # OTA source between the local and cloud builds.
+  local_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v3-manifest.json"
+  cloud_manifest_url: "https://smarthomeshop.github.io/watermeterkit/watermeterkit-v3-cloud-manifest.json"
+  default_network: "WiFi (local)"
 
 esphome:
   name: ${device_name}
@@ -43,6 +48,11 @@ esp32:
   board: esp32-c6-devkitc-1
   framework:
     type: esp-idf
+    # Flash size trims: improv BLE only needs legacy (4.2) advertising and a
+    # GATT server, so the BLE 5.0 feature set is unused weight (~39KB).
+    sdkconfig_options:
+      CONFIG_BT_BLE_50_FEATURES_SUPPORTED: n
+      CONFIG_ESP_ERR_TO_NAME_LOOKUP: n
   flash_size: 4MB
 
 preferences:
@@ -81,23 +91,6 @@ logger:
   hardware_uart: UART0
 
 api:
-
-wifi:
-  # No WiFi credentials are embedded in the firmware.
-  # Users can onboard with:
-  # - Captive Portal via the fallback AP
-  # - Improv Serial over USB
-  # - Improv BLE
-  ap:
-    ssid: ${device_name}
-    password: ${device_name}
-
-captive_portal:
-
-esp32_improv:
-  authorizer: none
-
-improv_serial:
 
 ota:
   - platform: esphome
@@ -195,13 +188,41 @@ update:
     name: "${friendly_name} Firmware"
     source: ${wifi_update_manifest_url}
 
+# === Firmware Variant Selector ===
+# Same contract as the other SmartHomeShop products so the setup portal bridge
+# (github://smarthomeshop/setup-portal) can drive it.
+script:
+  - id: sync_selected_firmware_source
+    then:
+      - lambda: |-
+          std::string option = id(firmware_selector).current_option();
+          if (option == "WiFi + SmartHomeShop App (cloud)" || option == "WiFi Cloud") {
+            ESP_LOGI("main", "OTA updates set to use WiFi + SmartHomeShop App (cloud) firmware");
+            id(firmware_update).set_source_url("${cloud_manifest_url}");
+          } else {
+            ESP_LOGI("main", "OTA updates set to use WiFi (local) firmware");
+            id(firmware_update).set_source_url("${local_manifest_url}");
+          }
+
+select:
+  - platform: template
+    id: firmware_selector
+    name: "${friendly_name} Firmware Variant"
+    icon: "mdi:network"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    options:
+      - "WiFi (local)"
+      - "WiFi + SmartHomeShop App (cloud)"
+    initial_option: ${default_network}
+    on_value:
+      then:
+        - script.execute: sync_selected_firmware_source
+        - update.check:
+
 # === Sensors ===
 sensor:
-  - platform: wifi_signal
-    id: sensor_wifi_signal
-    name: "${friendly_name} WiFi Signal"
-    update_interval: 60s
-
   # Uptime
   - platform: uptime
     id: sensor_uptime
@@ -294,18 +315,6 @@ sensor:
 
 # === Text Sensors ===
 text_sensor:
-  - platform: wifi_info
-    ip_address:
-      id: wifi_ip_address
-      name: "${friendly_name} IP Address"
-      entity_category: diagnostic
-      disabled_by_default: true
-    mac_address:
-      id: wifi_mac_address
-      name: "${friendly_name} MAC Address"
-      entity_category: diagnostic
-      disabled_by_default: true
-
   - platform: version
     id: text_sensor_version
     name: "${friendly_name} ESPHome Version"

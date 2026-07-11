@@ -1,0 +1,301 @@
+# WaterMeterKit Cloud Integration
+# Optional SmartHomeShop cloud sync over HTTP POST.
+
+json:
+
+substitutions:
+  cloud_enabled: "true"
+  cloud_api_url: "https://api.smarthomeshop.io"
+  cloud_api_version: "v1"
+  cloud_sync_interval: "60s"
+  cloud_active_sync_interval: "10s"
+  cloud_active_flow_threshold_lpm: "0.05"
+  cloud_min_sync_gap_ms: "9000"
+
+http_request:
+  useragent: watermeterkit-cloud-esphome
+  verify_ssl: false
+  timeout: 10s
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 10s
+        - if:
+            condition:
+              lambda: "return !id(cloud_is_registered);"
+            then:
+              - script.execute: cloud_register
+
+time:
+  - platform: sntp
+    id: sntp_cloud_time
+    timezone: "Europe/Amsterdam"
+    servers:
+      - "pool.ntp.org"
+      - "time.google.com"
+
+globals:
+  - id: cloud_device_token
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: cloud_device_id
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: cloud_is_registered
+    type: bool
+    restore_value: true
+    initial_value: "false"
+  - id: cloud_is_registering
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_last_sync_success
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_sync_failures
+    type: int
+    restore_value: false
+    initial_value: "0"
+  - id: cloud_last_sync_attempt_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: "0"
+
+button:
+  - platform: template
+    id: cloud_reset_button
+    name: "${friendly_name} Reset Cloud"
+    icon: "mdi:cloud-off"
+    entity_category: config
+    on_press:
+      - script.execute: cloud_reset
+
+binary_sensor:
+  - platform: template
+    id: cloud_connected
+    name: "${friendly_name} Cloud Connected"
+    icon: "mdi:cloud-check"
+    entity_category: diagnostic
+    lambda: |-
+      return id(cloud_is_registered) && id(cloud_last_sync_success);
+
+sensor:
+  - platform: template
+    id: cloud_sync_failure_count
+    name: "${friendly_name} Cloud Sync Failures"
+    entity_category: diagnostic
+    icon: "mdi:alert-circle"
+    accuracy_decimals: 0
+    lambda: "return id(cloud_sync_failures);"
+    update_interval: 60s
+
+text_sensor:
+  - platform: template
+    id: cloud_device_id_sensor
+    name: "${friendly_name} Cloud Device ID"
+    entity_category: diagnostic
+    icon: "mdi:cloud-outline"
+    lambda: |-
+      if (id(cloud_device_id).length() > 0) {
+        return id(cloud_device_id);
+      }
+      return {"Not registered"};
+    update_interval: 60s
+
+  - platform: template
+    id: cloud_status_text
+    name: "${friendly_name} Cloud Status"
+    entity_category: diagnostic
+    icon: "mdi:cloud-question"
+    lambda: |-
+      if (!id(cloud_is_registered)) {
+        return {"Registering..."};
+      }
+      if (id(cloud_device_token).length() == 0) {
+        return {"No token"};
+      }
+      if (id(cloud_sync_failures) > 10) {
+        return {"Error"};
+      }
+      if (id(cloud_last_sync_success)) {
+        return {"Connected"};
+      }
+      return {"Syncing..."};
+    update_interval: 15s
+
+script:
+  - id: cloud_register
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: "return id(cloud_is_registering);"
+          then:
+            - script.stop: cloud_register
+
+      - lambda: "id(cloud_is_registering) = true;"
+
+      - wait_until:
+          condition:
+            lambda: "return id(wifi_mac_address).has_state();"
+          timeout: 30s
+
+      - wait_until:
+          condition:
+            lambda: "return id(wifi_ip_address).has_state();"
+          timeout: 30s
+
+      - http_request.post:
+          url: "${cloud_api_url}/api/${cloud_api_version}/devices/register"
+          request_headers:
+            Content-Type: "application/json"
+            User-Agent: "WaterMeterKit/${software_version}"
+            Accept: "application/json"
+          json: |-
+            root["mac_address"] = id(wifi_mac_address).state;
+            root["hardware_version"] = "${hardware_version}";
+            root["firmware_version"] = "${software_version}";
+            root["product"] = "watermeterkit";
+            root["local_ip"] = id(wifi_ip_address).state;
+          capture_response: true
+          max_response_buffer_size: 512
+          on_response:
+            then:
+              - lambda: |-
+                  id(cloud_is_registering) = false;
+
+                  if (response->status_code == 200 || response->status_code == 201) {
+                    json::parse_json(body, [](JsonObject root) -> bool {
+                      if (root["device_id"].is<const char*>() && root["token"].is<const char*>()) {
+                        id(cloud_device_id) = root["device_id"].as<std::string>();
+                        id(cloud_device_token) = root["token"].as<std::string>();
+                        id(cloud_is_registered) = true;
+                        id(cloud_sync_failures) = 0;
+                        return true;
+                      }
+                      return false;
+                    });
+                  } else {
+                    id(cloud_sync_failures)++;
+                  }
+          on_error:
+            then:
+              - lambda: |-
+                  id(cloud_sync_failures)++;
+                  id(cloud_is_registering) = false;
+
+  - id: cloud_send_batch
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: "return !id(cloud_is_registered);"
+          then:
+            - script.execute: cloud_register
+            - script.stop: cloud_send_batch
+
+      - if:
+          condition:
+            lambda: "return id(cloud_device_token).length() == 0;"
+          then:
+            - lambda: "id(cloud_is_registered) = false;"
+            - script.execute: cloud_register
+            - script.stop: cloud_send_batch
+
+      - if:
+          condition:
+            lambda: |-
+              const uint32_t now = millis();
+              return id(cloud_last_sync_attempt_ms) != 0 && (uint32_t)(now - id(cloud_last_sync_attempt_ms)) < ${cloud_min_sync_gap_ms};
+          then:
+            - script.stop: cloud_send_batch
+
+      - lambda: |-
+          id(cloud_last_sync_attempt_ms) = millis();
+          id(cloud_last_sync_success) = false;
+
+      - http_request.post:
+          url: "${cloud_api_url}/api/${cloud_api_version}/devices/ingest"
+          request_headers:
+            Content-Type: "application/json"
+            Authorization: !lambda |-
+              static std::string auth;
+              auth = "Bearer ";
+              auth += id(cloud_device_token);
+              return auth.c_str();
+            User-Agent: "WaterMeterKit/${software_version}"
+            Accept: "application/json"
+          capture_response: true
+          max_response_buffer_size: 256
+          json: |-
+            root["device_id"] = id(cloud_device_id);
+            root["timestamp"] = id(sntp_cloud_time).now().timestamp;
+            root["has_water"] = true;
+
+            if (id(sensor_pulse_meter).has_state() && !isnan(id(sensor_pulse_meter).state)) {
+              root["water_flow_lpm"] = id(sensor_pulse_meter).state;
+            }
+            if (id(sensor_water_meter_total).has_state() && !isnan(id(sensor_water_meter_total).state)) {
+              root["water_total_m3"] = id(sensor_water_meter_total).state;
+            }
+
+            root["firmware_version"] = "${software_version}";
+            root["hardware_version"] = "${hardware_version}";
+          on_response:
+            then:
+              - lambda: |-
+                  if (response->status_code == 200) {
+                    id(cloud_last_sync_success) = true;
+                    id(cloud_sync_failures) = 0;
+                  } else if (response->status_code == 401) {
+                    id(cloud_is_registered) = false;
+                    id(cloud_device_token) = "";
+                    id(cloud_sync_failures)++;
+                  } else {
+                    id(cloud_sync_failures)++;
+                  }
+              - if:
+                  condition:
+                    lambda: "return id(cloud_last_sync_success);"
+                  then:
+                    - light.turn_on:
+                        id: light_led_blue
+                        flash_length: 100ms
+          on_error:
+            then:
+              - lambda: |-
+                  id(cloud_last_sync_success) = false;
+                  id(cloud_sync_failures)++;
+
+  - id: cloud_reset
+    mode: single
+    then:
+      - lambda: |-
+          id(cloud_device_id) = "";
+          id(cloud_device_token) = "";
+          id(cloud_is_registered) = false;
+          id(cloud_last_sync_success) = false;
+          id(cloud_sync_failures) = 0;
+      - delay: 5s
+      - script.execute: cloud_register
+
+interval:
+  - interval: ${cloud_active_sync_interval}
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(sensor_pulse_meter).has_state()
+                && !isnan(id(sensor_pulse_meter).state)
+                && id(sensor_pulse_meter).state > ${cloud_active_flow_threshold_lpm};
+          then:
+            - script.execute: cloud_send_batch
+
+  - interval: ${cloud_sync_interval}
+    then:
+      - script.execute: cloud_send_batch

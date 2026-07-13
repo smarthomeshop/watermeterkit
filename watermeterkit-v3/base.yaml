@@ -100,6 +100,14 @@ ota:
 
 web_server:
   port: 80
+  version: 3
+  sorting_groups:
+    - id: sorting_group_water
+      name: "Water"
+      sorting_weight: 10
+    - id: sorting_group_climate
+      name: "Climate"
+      sorting_weight: 20
 
 # === Device Controls ===
 switch:
@@ -246,6 +254,9 @@ sensor:
   - platform: pulse_meter
     id: sensor_pulse_meter
     name: "${friendly_name} Current Usage"
+    web_server:
+      sorting_group_id: sorting_group_water
+      sorting_weight: 1
     icon: mdi:water-pump
     unit_of_measurement: "L/min"
     accuracy_decimals: 1
@@ -281,6 +292,9 @@ sensor:
   - platform: template
     id: sensor_water_meter_total
     name: "${friendly_name} Water Meter Total"
+    web_server:
+      sorting_group_id: sorting_group_water
+      sorting_weight: 2
     icon: "mdi:water-check"
     unit_of_measurement: "m³"
     state_class: total_increasing
@@ -304,11 +318,17 @@ sensor:
     temperature:
       id: sensor_temperature
       name: "${friendly_name} Temperature"
+      web_server:
+        sorting_group_id: sorting_group_climate
+        sorting_weight: 1
       filters:
         - offset: -5.5
     humidity:
       id: sensor_humidity
       name: "${friendly_name} Humidity"
+      web_server:
+        sorting_group_id: sorting_group_climate
+        sorting_weight: 2
       filters:
         - offset: 12.0
     update_interval: 60s

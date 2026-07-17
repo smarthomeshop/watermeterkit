@@ -243,6 +243,9 @@ script:
             if (id(sensor_water_meter_total).has_state() && !isnan(id(sensor_water_meter_total).state)) {
               root["water_total_m3"] = id(sensor_water_meter_total).state;
             }
+            if (id(cpu_temperature).has_state() && !isnan(id(cpu_temperature).state)) {
+              root["cpu_temperature_c"] = id(cpu_temperature).state;
+            }
 
             root["firmware_version"] = "${software_version}";
             root["hardware_version"] = "${hardware_version}";
@@ -327,3 +330,9 @@ interval:
   - interval: ${cloud_sync_interval}
     then:
       - script.execute: cloud_send_batch
+
+# Cloud-only customers may never connect Home Assistant. Without this the
+# native API reboots the device every 15 minutes ("No clients; rebooting"),
+# so disable the no-client reboot on cloud firmware.
+api:
+  reboot_timeout: 0s

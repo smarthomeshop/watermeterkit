@@ -6,6 +6,8 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Fixed cloud firmware restarting every 15 minutes when Home Assistant is not connected: the no-client reboot of the native API is now disabled on cloud firmware, so cloud-only setups run uninterrupted.
+
 - Add customer-facing changes here before the next release is published.
 
 ## [WaterMeterKit V1 1.8] - 2026-07-13

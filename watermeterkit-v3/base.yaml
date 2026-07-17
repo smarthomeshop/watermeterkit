@@ -231,6 +231,13 @@ select:
 
 # === Sensors ===
 sensor:
+  # ESP32-C6 internal temperature for owner diagnostics.
+  - platform: internal_temperature
+    id: cpu_temperature
+    name: "${friendly_name} CPU Temperature"
+    entity_category: diagnostic
+    update_interval: 60s
+
   # Uptime
   - platform: uptime
     id: sensor_uptime

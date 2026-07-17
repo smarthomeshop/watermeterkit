@@ -1,6 +1,6 @@
 {
   "name": "WaterMeterKit V3 Cloud",
-  "version": "2.7",
+  "version": "2.8",
   "home_assistant_domain": "esphome",
   "new_install_skip_erase": false,
   "builds": [

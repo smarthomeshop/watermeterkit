@@ -6,9 +6,14 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing changes here before the next release is published.
+
+## [WaterMeterKit V3 2.9] - 2026-07-17
+
+
 - Added a CPU temperature diagnostic sensor, also synced to SmartHomeShop Cloud, and updated the built-in web interface to version 3.
 
-- Add customer-facing changes here before the next release is published.
+
 
 ## [WaterMeterKit V3 2.8] - 2026-07-17
 

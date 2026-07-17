@@ -6,9 +6,21 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing changes here before the next release is published.
+
+## [WaterMeterKit V1 1.9] - 2026-07-17
+
+
 - Fixed WaterMeterKit V1 and V2 cloud firmware restarting every 15 minutes when Home Assistant is not connected, matching the earlier V3 fix.
 
-- Add customer-facing changes here before the next release is published.
+
+
+## [WaterMeterKit V2 1.10] - 2026-07-17
+
+
+- Fixed WaterMeterKit V1 and V2 cloud firmware restarting every 15 minutes when Home Assistant is not connected, matching the earlier V3 fix.
+
+
 
 ## [WaterMeterKit V3 2.9] - 2026-07-17
 

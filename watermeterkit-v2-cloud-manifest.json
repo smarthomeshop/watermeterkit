@@ -8,7 +8,7 @@
       "chipFamily": "ESP8266",
       "ota": {
         "path": "watermeterkit-v2-cloud/watermeterkit-esp8266.ota.bin",
-        "md5": "eac59385974e56418f4f0160f6ebf99c"
+        "md5": "1a1144dfd514174cf4b00ceb2585a8ba"
       },
       "parts": [
         {

@@ -1,6 +1,6 @@
 {
   "name": "WaterMeterKit V1",
-  "version": "1.9",
+  "version": "1.10",
   "home_assistant_domain": "esphome",
   "new_install_skip_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP8266",
       "ota": {
         "path": "watermeterkit-v1/watermeterkit-esp8266.ota.bin",
-        "md5": "7cab7d74422e793d8fa33d9a9aaaca41"
+        "md5": "568b1c813b31b46f893fb44330dc35b6"
       },
       "parts": [
         {

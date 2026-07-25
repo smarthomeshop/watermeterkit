@@ -1,0 +1,11 @@
+# Size-regression build for the configuration produced by an ESPHome dashboard
+# import. The cloud package is the largest V3 variant and dashboard imports add
+# native API encryption to it. This build must keep fitting the 0x1C0000 OTA
+# slots already present on shipped V3 hardware.
+
+packages:
+  cloud: !include ../watermeterkit-cloud.yaml
+
+api:
+  encryption:
+    key: !secret api_encryption_key

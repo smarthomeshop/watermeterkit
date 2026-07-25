@@ -50,8 +50,12 @@ esp32:
     type: esp-idf
     # Flash size trims: improv BLE only needs legacy (4.2) advertising and a
     # GATT server, so the BLE 5.0 feature set is unused weight (~39KB).
+    # Keep assertions active but omit their verbose strings. Dashboard imports
+    # add native API encryption (~72KB); verbose assertion strings would make
+    # that customer build exceed the existing 0x1C0000 OTA partitions.
     sdkconfig_options:
       CONFIG_BT_BLE_50_FEATURES_SUPPORTED: n
+      CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_SILENT: y
       CONFIG_ESP_ERR_TO_NAME_LOOKUP: n
   flash_size: 4MB
 

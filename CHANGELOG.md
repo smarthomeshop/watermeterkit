@@ -6,7 +6,7 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing changes here before the next release is published.
+- Fixed V3 firmware installation failures after an ESPHome dashboard import added API encryption; encrypted local and cloud builds now fit the existing OTA partitions again.
 
 ## [WaterMeterKit V1 1.9] - 2026-07-17
 

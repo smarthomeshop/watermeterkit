@@ -497,6 +497,20 @@ jobs:
       software_version: ${{ needs.detect-changes.outputs.v3_version }}
       base_path: watermeterkit-v3
 
+  build-v3-api-encryption-size:
+    name: Validate V3 encrypted OTA size
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v3_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: watermeterkit-v3/tests/api-encryption-size.yaml
+      name: WaterMeterKit V3 API Encryption Size Check
+      clean: false
+      esphome_version: latest
+      directory_name: watermeterkit-v3-api-encryption-size-check
+      software_version: ${{ needs.detect-changes.outputs.v3_version }}
+      base_path: watermeterkit-v3
+
   publish-gh-pages:
     name: Publish firmware to GitHub Pages
     needs:
@@ -507,10 +521,15 @@ jobs:
       - build-v2-cloud
       - build-v3
       - build-v3-cloud
+      - build-v3-api-encryption-size
     if: |
       always() &&
       github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main' &&
+      (
+        needs.build-v3-api-encryption-size.result == 'success' ||
+        needs.build-v3-api-encryption-size.result == 'skipped'
+      ) &&
       (
         needs.build-v1.result == 'success' ||
         needs.build-v1-cloud.result == 'success' ||

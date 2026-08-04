@@ -475,7 +475,7 @@ jobs:
     if: needs.detect-changes.outputs.v3_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: watermeterkit-v3/watermeterkit.yaml
+      files: watermeterkit-v3/watermeterkit-factory-hardware-test.yaml
       name: WaterMeterKit V3
       clean: false
       esphome_version: latest
@@ -489,7 +489,7 @@ jobs:
     if: needs.detect-changes.outputs.v3_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: watermeterkit-v3/watermeterkit-cloud.yaml
+      files: watermeterkit-v3/watermeterkit-cloud-factory-hardware-test.yaml
       name: WaterMeterKit V3 Cloud
       clean: false
       esphome_version: latest

@@ -6,7 +6,8 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing changes here before the next release is published.
+- Added guided post-install hardware checks for WaterMeterKit V3 local and cloud
+  firmware flashed through the SmartHomeShop website.
 
 ## [WaterMeterKit V3 2.10] - 2026-07-25
 

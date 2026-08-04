@@ -1,0 +1,4 @@
+# WaterMeterKit V3 factory image with post-flash on-board hardware checks.
+packages:
+  product: !include watermeterkit.yaml
+  factory_hardware_test: !include packages/factory_hardware_test.yaml

@@ -6,7 +6,25 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing changes here before the next release is published.
+
+## [WaterMeterKit V1 1.10] - 2026-09-28
+
+
 - Fixed the Current Usage sensor on WaterMeterKit V1, V2 and V3 being rejected as a water flow rate in the Home Assistant Energy dashboard by adding the volume flow rate device class and measurement state class.
+
+
+## [WaterMeterKit V2 1.11] - 2026-09-28
+
+
+- Fixed the Current Usage sensor on WaterMeterKit V1, V2 and V3 being rejected as a water flow rate in the Home Assistant Energy dashboard by adding the volume flow rate device class and measurement state class.
+
+
+## [WaterMeterKit V3 2.12] - 2026-09-28
+
+
+- Fixed the Current Usage sensor on WaterMeterKit V1, V2 and V3 being rejected as a water flow rate in the Home Assistant Energy dashboard by adding the volume flow rate device class and measurement state class.
+
 
 ## [WaterMeterKit V3 2.11] - 2026-08-04
 

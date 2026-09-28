@@ -270,6 +270,8 @@ sensor:
       sorting_weight: 1
     icon: mdi:water-pump
     unit_of_measurement: "L/min"
+    device_class: volume_flow_rate
+    state_class: measurement
     accuracy_decimals: 1
     timeout: 2min
     internal_filter: 200ms

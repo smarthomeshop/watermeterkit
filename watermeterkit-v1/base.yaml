@@ -185,6 +185,8 @@ sensor:
     name: "${friendly_name} Current Usage"
     icon: "mdi:water-pump"
     unit_of_measurement: "L/min"
+    device_class: volume_flow_rate
+    state_class: measurement
     internal_filter_mode: PULSE
     timeout: 2min
     internal_filter: 200ms

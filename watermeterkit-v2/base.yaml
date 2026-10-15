@@ -7,7 +7,7 @@ substitutions:
   # Product identification
   device_name: watermeterkit
   friendly_name: WaterMeterKit
-  software_version: "1.11"
+  software_version: "1.12"
   hardware_version: "V2"
 
 packages:

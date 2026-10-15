@@ -103,7 +103,66 @@ WaterMeterKit V1, V2 and V3 store an absolute water meter total so the reading s
 2. Enter that value in `Water Meter Initial Value` in Home Assistant.
 3. Use `Water Meter Total` as the absolute meter reading going forward.
 
-To reduce flash wear on the ESP8266 hardware, the value is batched during normal use and also saved on clean restarts or OTA updates.
+All versions use the same checkpoint logic in
+[`packages/water-persistence.yaml`](packages/water-persistence.yaml). A changed
+meter reading is saved even when less than 50 litres have been used. The default
+`water_checkpoint_interval` is five minutes on V3 (ESP32-C6) and thirty minutes
+on V1/V2 (ESP8266). The longer ESP8266 interval limits wear because its
+preferences backend erases a single flash sector per changed sync, while ESP32
+uses NVS wear levelling. These intervals do not constitute a flash lifespan
+guarantee; lifetime depends on the flash chip and workload.
+
+No new pulses means no water checkpoint write. Calibration and clean restarts/OTA
+flush the latest reading immediately. Each water checkpoint also flushes other
+queued preferences. Existing global IDs/types and entity names are retained.
+The raw `Total Consumption` counter still starts at zero after a reboot; use
+`Water Meter Total` for the calibrated absolute reading.
+
+Sudden power loss or a crash can lose usage since the last successful checkpoint
+(normally up to five minutes on V3 or thirty minutes on V1/V2). Pulses during
+downtime cannot be counted. `water_checkpoint_interval` can be overridden, with
+a tradeoff between possible lost usage and flash wear. A normal API reconnect
+does not reset the counter. The existing two-minute flow timeout is unchanged;
+Home Assistant session-volume and daily-usage corrections belong in the
+integration.
+
+Run the storage regression checks with `python3 -m unittest discover -s tests`.
+They compile and execute the actual checkpoint, calibration and meter-reading
+lambdas using a local C++ compiler; no connected meter is required.
+
+## Local firmware checks
+
+With Python 3 and Docker Desktop running, use the pinned ESPHome 2026.7.3
+container. This builds V1/V2 ESP8266 firmware on Apple Silicon without installing
+Rosetta. No local ESPHome installation or secrets file is needed.
+
+```sh
+# Run the water storage regression tests inside Docker.
+python3 tools/check-firmware.py test
+
+# Test the storage logic, validate every entrypoint and generate its C++.
+python3 tools/check-firmware.py validate
+
+# Test and compile V3 local firmware (the default build).
+python3 tools/check-firmware.py build
+
+# Compile V1/V2 variants; multiple entrypoints run in sequence.
+python3 tools/check-firmware.py build watermeterkit-v1/watermeterkit.yaml watermeterkit-v2/watermeterkit.yaml
+
+# Check the largest V3 cloud variant with API encryption.
+python3 tools/check-firmware.py build watermeterkit-v3/tests/api-encryption-size.yaml
+```
+
+The same commands are available in the neighbouring `waterp1meterkit` repository.
+The script reads the current local YAML, stages a copy with dummy credentials
+and a dummy Thread dataset, and keeps logs, a JSON report and compiled binaries
+under the ignored `.local-build/` directory. Developers' `secrets.yaml` files
+are not copied. Test binaries contain dummy credentials and are not intended for
+flashing; device tests require a separate build with the device's configuration.
+Generated sources and compiler caches live in the local temporary directory
+(to avoid Docker file-lock errors in Documents/iCloud folders). The first run
+needs internet to download the container, toolchains and remote packages.
+Subsequent builds reuse the caches.
 
 ## Contributing
 

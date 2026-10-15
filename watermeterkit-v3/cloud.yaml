@@ -15,7 +15,8 @@ substitutions:
 http_request:
   useragent: watermeterkit-cloud-esphome
   verify_ssl: false
-  timeout: 10s
+  timeout: 3s
+  watchdog_timeout: 15s
 
 esphome:
   on_boot:

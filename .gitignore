@@ -7,3 +7,7 @@ secrets.yaml
 
 # macOS
 .DS_Store
+
+# Local Docker checks (dummy secrets, logs, firmware)
+.local-build/
+**/__pycache__/

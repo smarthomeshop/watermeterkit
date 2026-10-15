@@ -20,6 +20,7 @@ on:
     paths:
       - "CHANGELOG.md"
       - ".github/workflows/**"
+      - "packages/**"
       - "watermeterkit-v1/**"
       - "watermeterkit-v2/**"
       - "watermeterkit-v3/**"
@@ -68,7 +69,7 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if ! echo "$CHANGED_FILES" | grep -Eq '^watermeterkit-v1/.*\.ya?ml$|^watermeterkit-v2/.*\.ya?ml$|^watermeterkit-v3/.*\.ya?ml$'; then
+          if ! echo "$CHANGED_FILES" | grep -Eq '^packages/.*\.ya?ml$|^watermeterkit-v1/.*\.ya?ml$|^watermeterkit-v2/.*\.ya?ml$|^watermeterkit-v3/.*\.ya?ml$'; then
             echo "No firmware YAML changes detected; changelog update not required"
             exit 0
           fi
@@ -183,6 +184,13 @@ jobs:
           V1_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq "^watermeterkit-v1/.*\.ya?ml$" && echo "true" || echo "false")
           V2_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq "^watermeterkit-v2/.*\.ya?ml$" && echo "true" || echo "false")
           V3_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq "^watermeterkit-v3/.*\.ya?ml$" && echo "true" || echo "false")
+          # Shared water packages affect every hardware version.
+          if echo "$CHANGED_FILES" | grep -Eq "^packages/.*\.ya?ml$"; then
+            V1_CHANGED=true
+            V2_CHANGED=true
+            V3_CHANGED=true
+          fi
+
           WORKFLOW_CHANGED=$(echo "$CHANGED_FILES" | grep -q "^.github/workflows/" && echo "true" || echo "false")
 
           if [[ "$WORKFLOW_CHANGED" == "true" ]]; then

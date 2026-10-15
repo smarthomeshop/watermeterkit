@@ -6,7 +6,16 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing changes here before the next release is published.
+- Rebuild all hardware when shared water packages change.
+
+- Bound cloud HTTP waits and protect ESP32 cloud requests from task watchdog
+  resets without changing the cloud API message format.
+
+- Save changed water meter readings without waiting for 50 litres: every five
+  minutes on ESP32 hardware and every thirty minutes on ESP8266 hardware.
+- Immediately save manually calibrated meter readings and remaining usage on
+  clean restarts or OTA updates. Update the absolute reading on the first pulse.
+
 
 ## [WaterMeterKit V1 1.10] - 2026-09-28
 

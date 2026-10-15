@@ -2,7 +2,7 @@
   "chipFamily": "ESP32-C6",
   "ota": {
     "path": "watermeterkit-esp32c6.ota.bin",
-    "md5": "c4fb50fe21c5bba26a934971e60a5de1"
+    "md5": "c147212a2a9be5815fae3e5631e2d448"
   },
   "parts": [
     {

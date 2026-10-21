@@ -12,6 +12,9 @@ wifi:
     ssid: ${device_name}
     password: ${device_name}
 
+network:
+  enable_ipv6: true
+
 captive_portal:
 
 esp32_improv:
@@ -32,6 +35,16 @@ text_sensor:
       name: "${friendly_name} IP Address"
       entity_category: diagnostic
       disabled_by_default: true
+      address_1:
+        id: wifi_ipv6_link_local_address
+        name: "${friendly_name} IPv6 Link-Local Address"
+        entity_category: diagnostic
+        disabled_by_default: true
+      address_2:
+        id: wifi_ipv6_address
+        name: "${friendly_name} IPv6 Address"
+        entity_category: diagnostic
+        disabled_by_default: true
     mac_address:
       id: wifi_mac_address
       name: "${friendly_name} MAC Address"

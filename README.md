@@ -180,3 +180,15 @@ This project is released under the CC BY-NC 4.0 license.
 
 
 ![WaterMeterKit](images/watermeterkit-inthebox-shop.png)
+
+## Home Assistant API encryption
+
+Runtime API encryption is enabled by default on V3. V1 and V2 retain their existing API configuration: their 1 MB ESP8266 flash cannot accommodate the tested encrypted cloud firmware plus the temporary image required for a subsequent OTA update, even with gzip compression. Custom V1/V2 encrypted builds require a separate firmware-size and OTA-space assessment.
+
+The firmware supports a unique API encryption key provisioned at runtime. No shared key is compiled into manufacturer firmware. Until a key is provisioned, unencrypted clients can connect; compatible Home Assistant versions can automatically provision a key and then use encrypted connections. Other native API clients must use the same key once encryption is active.
+
+Runtime-provisioned keys survive reboots and normal manufacturer OTA updates that preserve preferences, provided the target firmware also supports runtime API encryption. Factory resets, erased preferences, or firmware without encryption support do not provide this guarantee.
+
+A key previously compiled into a custom YAML configuration is not automatically copied into runtime storage. Moving from a YAML key to manufacturer firmware requires a one-time provisioning/reconfiguration step; entering a key only in a Home Assistant connection form does not write it to the device. Keep using ESPHome Device Builder updates if that migration has not been completed.
+
+This setting controls the local native ESPHome API. SmartHomeShop Cloud uses its separate HTTP token authentication. See the [ESPHome API documentation](https://esphome.io/components/api/#configuration-variables).

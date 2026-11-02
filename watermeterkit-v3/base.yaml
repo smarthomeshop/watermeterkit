@@ -69,6 +69,8 @@ logger:
   hardware_uart: UART0
 
 api:
+  # Provision a per-device key at runtime and retain it across OTA updates.
+  encryption:
 
 ota:
   - platform: esphome

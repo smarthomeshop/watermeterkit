@@ -6,7 +6,7 @@ This changelog starts on 2026-04-01. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing changes here before the next release is published.
+- V3: support per-device native API encryption keys provisioned at runtime and retained across normal OTA updates. Existing YAML keys require a one-time migration; other native API clients need the provisioned key once encryption is active. Keep the existing V1/V2 API configuration to preserve OTA space on their 1 MB ESP8266 hardware.
 
 ## [WaterMeterKit V1 1.11] - 2026-10-15
 

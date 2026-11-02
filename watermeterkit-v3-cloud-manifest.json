@@ -1,6 +1,6 @@
 {
   "name": "WaterMeterKit V3 Cloud",
-  "version": "2.13",
+  "version": "2.14",
   "home_assistant_domain": "esphome",
   "new_install_skip_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-C6",
       "ota": {
         "path": "watermeterkit-v3-cloud/watermeterkit-esp32c6.ota.bin",
-        "md5": "81060c333759b4bbc2abfc71abd176ff"
+        "md5": "40801e67e903b3d1e6bd865f2366038f"
       },
       "parts": [
         {
